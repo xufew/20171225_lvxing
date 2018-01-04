@@ -4,6 +4,7 @@
 # Try your best
 # ============
 import sys
+import pickle
 
 import few_model
 
@@ -56,7 +57,7 @@ provinceDic = {
         }
 
 
-def process_list(stringList):
+def process_list(stringList, provinceValue):
     '''
     进行一行的处理
     '''
@@ -67,18 +68,50 @@ def process_list(stringList):
     genderList = few_model.Preprocessor.one_hot(genderDic, gender)
     provinceList = few_model.Preprocessor.one_hot(provinceDic, province)
     ageList = few_model.Preprocessor.one_hot(ageDic, age)
-    outString = '{}\t{}\t{}\t{}'.format(
+    outString = '{},{},{},{},{}'.format(
             userId,
-            '\t'.join(list(map(lambda x: str(x), genderList))),
-            '\t'.join(list(map(lambda x: str(x), provinceList))),
-            '\t'.join(list(map(lambda x: str(x), ageList))),
+            ','.join(list(map(lambda x: str(x), genderList))),
+            ','.join(list(map(lambda x: str(x), provinceList))),
+            ','.join(list(map(lambda x: str(x), ageList))),
+            ','.join(provinceValue[province]),
             )
     return outString
+
+
+def get_hot_name(inputDic):
+    return few_model.Preprocessor.get_one_hot_name(inputDic)
+
+
+def get_province():
+    nameList = []
+    valueDic = {}
+    with open('./province.pkl', 'rb') as fileReader:
+        provinceDic = pickle.load(fileReader)
+    count = 0
+    for province in provinceDic:
+        count += 1
+        if count == 1:
+            valueDic[province] = []
+        else:
+            valueDic[province] = ['']*len(nameList)
+        for info in provinceDic[province]:
+            for date in provinceDic[province][info]:
+                thisName = '{}_{}'.format(info, date)
+                thisValue = provinceDic[province][info][date]
+                if count == 1:
+                    nameList.append(thisName)
+                    valueDic[province].append(thisValue)
+                else:
+                    valueDic[province][nameList.index(thisName)] = thisValue
+    valueDic[''] = ['']*len(nameList)
+    return nameList, valueDic
 
 
 if __name__ == '__main__':
     userProfilePath = sys.argv[1]
     outUserProfile = sys.argv[2]
+    provinceName, provinceValue = get_province()
+    #
     count = 0
     fileWriter = open(outUserProfile, 'wb')
     with open(userProfilePath, 'rb') as fileReader:
@@ -88,14 +121,15 @@ if __name__ == '__main__':
                 count += 1
                 stringList = stringLine.strip().decode('utf8').split(',')
                 if count == 1:
-                    outString = '{}\t{}\t{}\t{}'.format(
-                            'userId',
-                            '\t'.join(few_model.Preprocessor.get_one_hot_name(genderDic)),
-                            '\t'.join(few_model.Preprocessor.get_one_hot_name(provinceDic)),
-                            '\t'.join(few_model.Preprocessor.get_one_hot_name(ageDic)),
+                    outString = '{},{},{},{},{}'.format(
+                            'userid',
+                            ','.join(get_hot_name(genderDic)),
+                            ','.join(get_hot_name(provinceDic)),
+                            ','.join(get_hot_name(ageDic)),
+                            ','.join(provinceName),
                             )
                 else:
-                    outString = process_list(stringList)
+                    outString = process_list(stringList, provinceValue)
                 fileWriter.write(
                         '{}\n'.format(outString).encode('utf8')
                         )
