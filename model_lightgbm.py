@@ -40,20 +40,21 @@ if __name__ == '__main__':
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']
     params = {
-            'learning_rate': 0.1,
-            'num_leaves': 31,
-            'num_trees': 200,
-            'min_sum_hessian_in_leaf': 0.001,
-            'min_data_in_leaf': 20,
-            'feature_fraction': 1,
-            'bagging_fraction': 1,
+            'learning_rate': 0.05,
+            'num_leaves': 70,
+            'num_trees': 340,
+            'min_sum_hessian_in_leaf': 0.1,
+            'min_data_in_leaf': 50,
+            'feature_fraction': 0.3,
+            'bagging_fraction': 0.5,
             'lambda_l1': 0,
-            'lambda_l2': 0,
+            'lambda_l2': 10,
+            'num_threads': 4,
             }
     params = few_model.Lightgbm.set_param(params)
-    # 交叉验证
-    few_model.Lightgbm.cv(trainX, trainY, params)
-    # # 开始训练
-    # trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
-    # # 预测
-    # predict(modelPath)
+    # # 交叉验证
+    # few_model.Lightgbm.cv(trainX, trainY, params)
+    # 开始训练
+    trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
+    # 预测
+    predict(modelPath)

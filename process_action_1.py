@@ -41,10 +41,58 @@ def write_feature_name(fileWriter):
             'justType6',
             'go9Dis',
             'go9Time',
+            'continueMin1',
+            'continueMin2',
+            'continueMin3',
+            'continueMin4',
+            'continueMin5',
+            'continueMin6',
+            'continueMin7',
+            'continueMin8',
+            'continueMin9',
+            'continueMax1',
+            'continueMax2',
+            'continueMax3',
+            'continueMax4',
+            'continueMax5',
+            'continueMax6',
+            'continueMax7',
+            'continueMax8',
+            'continueMax9',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
             )
+
+
+def continue_dic():
+    '''
+    统计连续相同type的相关信息
+    '''
+    outDic = {
+            '1': [],
+            '2': [],
+            '3': [],
+            '4': [],
+            '5': [],
+            '6': [],
+            '7': [],
+            '8': [],
+            '9': [],
+            }
+    return outDic
+
+
+def continue_return_value(useType, valueType, valueDic):
+    valueList = valueDic[useType]
+    if len(valueList) == 0:
+        return ''
+    else:
+        if valueType == 'min':
+            outValue = min(valueList)
+        elif valueType == 'max':
+            outValue = max(valueList)
+        return outValue
 
 
 if __name__ == '__main__':
@@ -88,6 +136,7 @@ if __name__ == '__main__':
         go9Time = 0
         go9DisList = []
         go9TimeList = []
+        continueDic = continue_dic()
         for i, thisTime in enumerate(timeSort):
             thisType = valueDic[thisTime]
             con1 = thisType == '9'
@@ -101,6 +150,12 @@ if __name__ == '__main__':
                 go9TimeList.append(go9Time/float(go9Dis))
                 go9Dis = 0
                 go9Time = 0
+            if con3:
+                nextType = valueDic[timeSort[i+1]]
+                if nextType == thisType:
+                    continueDic[nextType].append(
+                            int(timeSort[i+1])-int(timeSort[i])
+                            )
         # 储存
         outList = [
                 userId,
@@ -111,6 +166,24 @@ if __name__ == '__main__':
                 str(justType6),
                 str(max(go9DisList)),
                 str(max(go9TimeList)),
+                str(continue_return_value('1', 'min', continueDic)),
+                str(continue_return_value('2', 'min', continueDic)),
+                str(continue_return_value('3', 'min', continueDic)),
+                str(continue_return_value('4', 'min', continueDic)),
+                str(continue_return_value('5', 'min', continueDic)),
+                str(continue_return_value('6', 'min', continueDic)),
+                str(continue_return_value('7', 'min', continueDic)),
+                str(continue_return_value('8', 'min', continueDic)),
+                str(continue_return_value('9', 'min', continueDic)),
+                str(continue_return_value('1', 'max', continueDic)),
+                str(continue_return_value('2', 'max', continueDic)),
+                str(continue_return_value('3', 'max', continueDic)),
+                str(continue_return_value('4', 'max', continueDic)),
+                str(continue_return_value('5', 'max', continueDic)),
+                str(continue_return_value('6', 'max', continueDic)),
+                str(continue_return_value('7', 'max', continueDic)),
+                str(continue_return_value('8', 'max', continueDic)),
+                str(continue_return_value('9', 'max', continueDic)),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')
