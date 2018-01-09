@@ -11,7 +11,7 @@ def process_line(stringList, userDic):
     orderId = stringList[1]
     score = stringList[2]
     tag = stringList[3]
-    comment = stringList[4]
+    comment = stringList[4:]
     if userId not in userDic:
         userDic[userId] = __init_user()
     # 好评论次数
@@ -23,6 +23,8 @@ def process_line(stringList, userDic):
     # 包含特殊语句
     if '行程安排有惊喜' in tag:
         userDic[userId]['jingxiword'] = 1
+    # 提取短语长度
+    userDic[userId]['specialLen'] = len(comment)
 
 
 def __init_user():
@@ -30,6 +32,7 @@ def __init_user():
             'badScoreTime': 0,
             'goodScoreTime': 0,
             'jingxiword': 0,
+            'specialLen': '',
             }
     return outDic
 
@@ -60,6 +63,7 @@ if __name__ == '__main__':
                     'badScoreTime',
                     'goodScoreTime',
                     'jingxiword',
+                    'specialLen',
                     ]
             fileWriter.write(
                     '{}\n'.format(','.join(nameList)).encode('utf8')
@@ -68,11 +72,13 @@ if __name__ == '__main__':
         badScoreTime = infoDic['badScoreTime']
         goodScoreTime = infoDic['goodScoreTime']
         jingxiword = infoDic['jingxiword']
+        specialLen = infoDic['specialLen']
         outList = [
                 userId,
                 str(badScoreTime),
                 str(goodScoreTime),
                 str(jingxiword),
+                str(specialLen),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

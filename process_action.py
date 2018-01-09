@@ -133,6 +133,37 @@ def get_hot_name(processDic, addName=''):
     return transName
 
 
+def type_to_type():
+    '''
+    类别到类别之间的统计
+    '''
+    def get_one():
+        oneDic = {
+                '1': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '2': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '3': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '4': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '5': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '6': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '7': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '8': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '9': {'min': '', 'max': '', 'av': '', 'num': 0},
+                }
+        return oneDic
+    outDic = {
+            '1': get_one(),
+            '2': get_one(),
+            '3': get_one(),
+            '4': get_one(),
+            '5': get_one(),
+            '6': get_one(),
+            '7': get_one(),
+            '8': get_one(),
+            '9': get_one(),
+            }
+    return outDic
+
+
 if __name__ == '__main__':
     actionPath = sys.argv[1]
     outPath = sys.argv[2]
@@ -155,6 +186,14 @@ if __name__ == '__main__':
                 userDic[userId][actionTime] = actionType
             else:
                 break
+    typeToTypeName = ''
+    for i in range(1, 10):
+        i = str(i)
+        for j in range(1, 10):
+            j = str(j)
+            for k in ['min', 'max']:
+                typeToTypeName += '{}To{}Time{},'.format(j, i, k)
+    typeToTypeName = typeToTypeName.strip(',')
     nameList = [
             'userid',
             get_hot_name(typeDic, 'lastType'),
@@ -234,6 +273,7 @@ if __name__ == '__main__':
             'recentmin7',
             'recentmin8',
             'recentmin9',
+            typeToTypeName,
             ]
     fileWriter.write(
             '{}\n'.format(','.join(nameList)).encode('utf8')
@@ -370,6 +410,34 @@ if __name__ == '__main__':
         recentmin7 = if_second_in('7', recentRangeDic, 'min')
         recentmin8 = if_second_in('8', recentRangeDic, 'min')
         recentmin9 = if_second_in('9', recentRangeDic, 'min')
+        # 类别到类别之间的信息
+        typeToTypeDic = type_to_type()
+        for i in range(1, len(timeSort)):
+            for j in range(0, i):
+                toType = valueDic[timeSort[i]]
+                startType = valueDic[timeSort[j]]
+                typeDis = int(timeSort[i])-int(timeSort[j])
+                typeToTypeDic[toType][startType]['num'] += 1
+                if typeToTypeDic[toType][startType]['max'] == '':
+                    typeToTypeDic[toType][startType]['max'] = typeDis
+                elif typeToTypeDic[toType][startType]['max'] < typeDis:
+                    typeToTypeDic[toType][startType]['max'] = typeDis
+                if typeToTypeDic[toType][startType]['min'] == '':
+                    typeToTypeDic[toType][startType]['min'] = typeDis
+                elif typeToTypeDic[toType][startType]['min'] > typeDis:
+                    typeToTypeDic[toType][startType]['min'] = typeDis
+                if typeToTypeDic[toType][startType]['av'] == '':
+                    typeToTypeDic[toType][startType]['av'] = typeDis
+                else:
+                    typeToTypeDic[toType][startType]['av'] + typeDis
+        typeToTypeValue = ''
+        for i in range(1, 10):
+            i = str(i)
+            for j in range(1, 10):
+                j = str(j)
+                for k in ['min', 'max']:
+                    typeToTypeValue += '{},'.format(typeToTypeDic[i][j][k])
+        typeToTypeValue = typeToTypeValue.strip(',')
         outList = [
                 userId,
                 lastType,                   # 最后一个类型
@@ -449,6 +517,7 @@ if __name__ == '__main__':
                 str(recentmin7),             # 距离最近一次7最短间隔
                 str(recentmin8),             # 距离最近一次8最短间隔
                 str(recentmin9),             # 距离最近一次9最短间隔
+                typeToTypeValue,
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

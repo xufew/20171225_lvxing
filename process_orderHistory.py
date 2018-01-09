@@ -4,9 +4,10 @@
 # Try your best
 # ============
 import sys
+import pickle
 
 
-def process_line(stringList, userDic):
+def process_line(stringList, userDic, cityPer, countryPer, continentPer):
     userId = stringList[0]
     orderId = stringList[1]
     orderTime = stringList[2]
@@ -34,6 +35,13 @@ def process_line(stringList, userDic):
             userDic[userId]['nearSuper'] = 1
         else:
             userDic[userId]['nearSuper'] = 0
+    # 所去城市，州，大陆的概率
+    if city in cityPer:
+        userDic[userId]['cityPer'] = cityPer[city]
+    if country in countryPer:
+        userDic[userId]['countryPer'] = countryPer[country]
+    if continent in continentPer:
+        userDic[userId]['continentPer'] = continentPer[continent]
 
 
 def __init_user():
@@ -44,13 +52,30 @@ def __init_user():
             'nearestTime': 0,       # 最近下单时间
             'nearSuper': 0,         # 最近一次下单是否为精品订单
             'simpleNum': 0,         # 普通单数量
+            'cityPer': '',
+            'countryPer': '',
+            'continentPer': '',
             }
     return outDic
+
+
+def read_go_dic():
+    '''
+    获取去city,country,continent的不同概率
+    '''
+    with open('./continent.pkl', 'rb') as fileReader:
+        continent = pickle.load(fileReader)
+    with open('./country.pkl', 'rb') as fileReader:
+        country = pickle.load(fileReader)
+    with open('./city.pkl', 'rb') as fileReader:
+        city = pickle.load(fileReader)
+    return city, country, continent
 
 
 if __name__ == '__main__':
     orderHistoryPath = sys.argv[1]
     outPath = sys.argv[2]
+    cityPer, countryPer, continentPer = read_go_dic()
     with open(orderHistoryPath, 'rb') as fileReader:
         count = 0
         userDic = {}
@@ -61,7 +86,13 @@ if __name__ == '__main__':
                 if count == 1:
                     continue
                 stringList = stringLine.strip().decode('utf8').split(',')
-                process_line(stringList, userDic)
+                process_line(
+                        stringList,
+                        userDic,
+                        cityPer,
+                        countryPer,
+                        continentPer,
+                        )
             else:
                 break
     fileWriter = open(outPath, 'wb')
@@ -77,6 +108,9 @@ if __name__ == '__main__':
                     'nearSuper',
                     'simpleNum',
                     'simplePer',
+                    'cityPer',
+                    'countryPer',
+                    'continentPer',
                     ]
             fileWriter.write(
                     '{}\n'.format(','.join(nameList)).encode('utf8')
@@ -95,7 +129,10 @@ if __name__ == '__main__':
                 str(superPer),
                 str(nearSuper),
                 str(simpleNum),
-                str(simpleNum/float(orderNum))
+                str(simpleNum/float(orderNum)),
+                str(infoDic['cityPer']),
+                str(infoDic['countryPer']),
+                str(infoDic['continentPer']),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

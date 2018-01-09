@@ -4,9 +4,8 @@
 # Try your best
 # ============
 import sys
-import json
 
-import pandas as pd
+import numpy as np
 
 
 def read_userDic(actionPath):
@@ -59,6 +58,42 @@ def write_feature_name(fileWriter):
             'continueMax7',
             'continueMax8',
             'continueMax9',
+            'continueVar1',
+            'continueVar2',
+            'continueVar3',
+            'continueVar4',
+            'continueVar5',
+            'continueVar6',
+            'continueVar7',
+            'continueVar8',
+            'continueVar9',
+            'continueAv1',
+            'continueAv2',
+            'continueAv3',
+            'continueAv4',
+            'continueAv5',
+            'continueAv6',
+            'continueAv7',
+            'continueAv8',
+            'continueAv9',
+            'typeDismin1',
+            'typeDismin2',
+            'typeDismin3',
+            'typeDismin4',
+            'typeDismin5',
+            'typeDismin6',
+            'typeDismin7',
+            'typeDismin8',
+            'typeDismin9',
+            'typeDismax1',
+            'typeDismax2',
+            'typeDismax3',
+            'typeDismax4',
+            'typeDismax5',
+            'typeDismax6',
+            'typeDismax7',
+            'typeDismax8',
+            'typeDismax9',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -84,6 +119,9 @@ def continue_dic():
 
 
 def continue_return_value(useType, valueType, valueDic):
+    '''
+    返回连续命中的相关值
+    '''
     valueList = valueDic[useType]
     if len(valueList) == 0:
         return ''
@@ -92,7 +130,29 @@ def continue_return_value(useType, valueType, valueDic):
             outValue = min(valueList)
         elif valueType == 'max':
             outValue = max(valueList)
+        elif valueType == 'av':
+            outValue = sum(valueList)/float(len(valueList))
+        elif valueType == 'var':
+            outValue = np.var(valueList)
         return outValue
+
+
+def to_type_time():
+    '''
+    距离不同type的最短和最长时间间隔
+    '''
+    outDic = {
+            '1': {'min': '', 'max': ''},
+            '2': {'min': '', 'max': ''},
+            '3': {'min': '', 'max': ''},
+            '4': {'min': '', 'max': ''},
+            '5': {'min': '', 'max': ''},
+            '6': {'min': '', 'max': ''},
+            '7': {'min': '', 'max': ''},
+            '8': {'min': '', 'max': ''},
+            '9': {'min': '', 'max': ''},
+            }
+    return outDic
 
 
 if __name__ == '__main__':
@@ -137,6 +197,7 @@ if __name__ == '__main__':
         go9DisList = []
         go9TimeList = []
         continueDic = continue_dic()
+        typeDisDic = to_type_time()
         for i, thisTime in enumerate(timeSort):
             thisType = valueDic[thisTime]
             con1 = thisType == '9'
@@ -151,11 +212,24 @@ if __name__ == '__main__':
                 go9Dis = 0
                 go9Time = 0
             if con3:
+                # 统计连续命中情况
                 nextType = valueDic[timeSort[i+1]]
                 if nextType == thisType:
                     continueDic[nextType].append(
                             int(timeSort[i+1])-int(timeSort[i])
                             )
+            if con3:
+                # 统计到不同类型最近一次操作最短和最长时间
+                useType = valueDic[timeSort[i+1]]
+                typeDis = int(timeSort[i+1])-int(timeSort[i])
+                if typeDisDic[useType]['max'] == '':
+                    typeDisDic[useType]['max'] = typeDis
+                elif typeDisDic[useType]['max'] < typeDis:
+                    typeDisDic[useType]['max'] = typeDis
+                if typeDisDic[useType]['min'] == '':
+                    typeDisDic[useType]['min'] = typeDis
+                elif typeDisDic[useType]['min'] > typeDis:
+                    typeDisDic[useType]['min'] = typeDis
         # 储存
         outList = [
                 userId,
@@ -184,6 +258,42 @@ if __name__ == '__main__':
                 str(continue_return_value('7', 'max', continueDic)),
                 str(continue_return_value('8', 'max', continueDic)),
                 str(continue_return_value('9', 'max', continueDic)),
+                str(continue_return_value('1', 'var', continueDic)),
+                str(continue_return_value('2', 'var', continueDic)),
+                str(continue_return_value('3', 'var', continueDic)),
+                str(continue_return_value('4', 'var', continueDic)),
+                str(continue_return_value('5', 'var', continueDic)),
+                str(continue_return_value('6', 'var', continueDic)),
+                str(continue_return_value('7', 'var', continueDic)),
+                str(continue_return_value('8', 'var', continueDic)),
+                str(continue_return_value('9', 'var', continueDic)),
+                str(continue_return_value('1', 'av', continueDic)),
+                str(continue_return_value('2', 'av', continueDic)),
+                str(continue_return_value('3', 'av', continueDic)),
+                str(continue_return_value('4', 'av', continueDic)),
+                str(continue_return_value('5', 'av', continueDic)),
+                str(continue_return_value('6', 'av', continueDic)),
+                str(continue_return_value('7', 'av', continueDic)),
+                str(continue_return_value('8', 'av', continueDic)),
+                str(continue_return_value('9', 'av', continueDic)),
+                str(typeDisDic['1']['min']),
+                str(typeDisDic['2']['min']),
+                str(typeDisDic['3']['min']),
+                str(typeDisDic['4']['min']),
+                str(typeDisDic['5']['min']),
+                str(typeDisDic['6']['min']),
+                str(typeDisDic['7']['min']),
+                str(typeDisDic['8']['min']),
+                str(typeDisDic['9']['min']),
+                str(typeDisDic['1']['max']),
+                str(typeDisDic['2']['max']),
+                str(typeDisDic['3']['max']),
+                str(typeDisDic['4']['max']),
+                str(typeDisDic['5']['max']),
+                str(typeDisDic['6']['max']),
+                str(typeDisDic['7']['max']),
+                str(typeDisDic['8']['max']),
+                str(typeDisDic['9']['max']),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

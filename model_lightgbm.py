@@ -42,7 +42,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 70,
-            'num_trees': 340,
+            'num_trees': 400,
             'min_sum_hessian_in_leaf': 0.1,
             'min_data_in_leaf': 50,
             'feature_fraction': 0.3,
