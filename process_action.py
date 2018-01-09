@@ -109,10 +109,12 @@ def get_range(valueDic, timeSort):
             avRange = ''
             varRange = ''
         minRange = min(rangeList) if len(rangeList) > 0 else ''
+        maxRange = max(rangeList) if len(rangeList) > 0 else ''
         recentDic[thisType] = {
                 'av': avRange,
                 'var': varRange,
                 'min': minRange,
+                'max': maxRange,
                 }
     return recentDic
 
@@ -273,6 +275,15 @@ if __name__ == '__main__':
             'recentmin7',
             'recentmin8',
             'recentmin9',
+            'recentmax1',
+            'recentmax2',
+            'recentmax3',
+            'recentmax4',
+            'recentmax5',
+            'recentmax6',
+            'recentmax7',
+            'recentmax8',
+            'recentmax9',
             typeToTypeName,
             ]
     fileWriter.write(
@@ -410,7 +421,16 @@ if __name__ == '__main__':
         recentmin7 = if_second_in('7', recentRangeDic, 'min')
         recentmin8 = if_second_in('8', recentRangeDic, 'min')
         recentmin9 = if_second_in('9', recentRangeDic, 'min')
-        # 类别到类别之间的信息
+        recentmax1 = if_second_in('1', recentRangeDic, 'max')
+        recentmax2 = if_second_in('2', recentRangeDic, 'max')
+        recentmax3 = if_second_in('3', recentRangeDic, 'max')
+        recentmax4 = if_second_in('4', recentRangeDic, 'max')
+        recentmax5 = if_second_in('5', recentRangeDic, 'max')
+        recentmax6 = if_second_in('6', recentRangeDic, 'max')
+        recentmax7 = if_second_in('7', recentRangeDic, 'max')
+        recentmax8 = if_second_in('8', recentRangeDic, 'max')
+        recentmax9 = if_second_in('9', recentRangeDic, 'max')
+        # 类别到类9别之间的信息
         typeToTypeDic = type_to_type()
         for i in range(1, len(timeSort)):
             for j in range(0, i):
@@ -517,6 +537,15 @@ if __name__ == '__main__':
                 str(recentmin7),             # 距离最近一次7最短间隔
                 str(recentmin8),             # 距离最近一次8最短间隔
                 str(recentmin9),             # 距离最近一次9最短间隔
+                str(recentmax1),             # 距离最近一次1最长间隔
+                str(recentmax2),             # 距离最近一次2最长间隔
+                str(recentmax3),             # 距离最近一次3最长间隔
+                str(recentmax4),             # 距离最近一次4最长间隔
+                str(recentmax5),             # 距离最近一次5最长间隔
+                str(recentmax6),             # 距离最近一次6最长间隔
+                str(recentmax7),             # 距离最近一次7最长间隔
+                str(recentmax8),             # 距离最近一次8最长间隔
+                str(recentmax9),             # 距离最近一次9最长间隔
                 typeToTypeValue,
                 ]
         fileWriter.write(

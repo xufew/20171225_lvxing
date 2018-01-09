@@ -8,6 +8,47 @@ import sys
 import numpy as np
 
 
+def if_second_in(typeNum, valueDic, valueName):
+    if typeNum in valueDic:
+        outValue = valueDic[typeNum][valueName]
+    else:
+        outValue = ''
+    return outValue
+
+
+def if_value_in(typeNum, valueDic):
+    if typeNum in valueDic:
+        outValue = valueDic[typeNum]
+    else:
+        outValue = 0
+    return outValue
+
+
+def if_value_dic(typeNum, valueDic):
+    if typeNum in valueDic:
+        outValue = valueDic[typeNum]
+    else:
+        outValue = ''
+    return outValue
+
+
+def get_recent_dis(valueDic, timeSort):
+    '''
+    离最近的操作距离
+    '''
+    recentDic = {}
+    nowIndex = timeSort.index(timeSort[-1])
+    for thisTime in timeSort:
+        thisType = valueDic[thisTime]
+        thisDis = nowIndex-timeSort.index(thisTime)
+        if thisType not in recentDic:
+            recentDic[thisType] = thisDis
+        else:
+            if recentDic[thisType] > thisDis:
+                recentDic[thisType] = thisDis
+    return recentDic
+
+
 def read_userDic(actionPath):
     with open(actionPath, 'rb') as fileReader:
         count = 0
@@ -31,6 +72,14 @@ def read_userDic(actionPath):
 
 
 def write_feature_name(fileWriter):
+    typeToTypeName = ''
+    for i in [10, 11]:
+        i = str(i)
+        for j in range(1, 12):
+            j = str(j)
+            for k in ['min', 'max']:
+                typeToTypeName += '{}To{}Time{},'.format(j, i, k)
+    typeToTypeName = typeToTypeName.strip(',')
     featureList = [
             'userid',
             'justType1',
@@ -94,6 +143,21 @@ def write_feature_name(fileWriter):
             'typeDismax7',
             'typeDismax8',
             'typeDismax9',
+            'recent10',
+            'recent11',
+            'type10Per',
+            'type11Per',
+            'type10Num',
+            'type11Num',
+            'recentDis10',
+            'recentDis11',
+            typeToTypeName,
+            'recentVar10',
+            'recentVar11',
+            'recentAv10',
+            'recentAv11',
+            'recentmin10',
+            'recentmin11',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -114,6 +178,8 @@ def continue_dic():
             '7': [],
             '8': [],
             '9': [],
+            '10': [],
+            '11': [],
             }
     return outDic
 
@@ -151,8 +217,92 @@ def to_type_time():
             '7': {'min': '', 'max': ''},
             '8': {'min': '', 'max': ''},
             '9': {'min': '', 'max': ''},
+            '10': {'min': '', 'max': ''},
+            '11': {'min': '', 'max': ''},
             }
     return outDic
+
+
+def get_recent_dic(valueDic, timeSort):
+    '''
+    获取每个类别状态:
+    距离最近时间的时间差
+    最开始的时间差
+    '''
+    recentDic = {}
+    nowTime = int(timeSort[-1])
+    firstTime = int(timeSort[0])
+    for thisTime in timeSort:
+        thisType = valueDic[thisTime]
+        rangeTime = nowTime-int(thisTime)
+        rangeFirst = int(thisTime)-firstTime
+        recentDic[thisType] = {
+                'nowTime': rangeTime,
+                'firstTime': rangeFirst,
+                }
+    return recentDic
+
+
+def type_to_type():
+    '''
+    类别到类别之间的统计
+    '''
+    def get_one():
+        oneDic = {
+                '1': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '2': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '3': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '4': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '5': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '6': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '7': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '8': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '9': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '10': {'min': '', 'max': '', 'av': '', 'num': 0},
+                '11': {'min': '', 'max': '', 'av': '', 'num': 0},
+                }
+        return oneDic
+    outDic = {
+            '10': get_one(),
+            '11': get_one(),
+            }
+    return outDic
+
+
+def get_range(valueDic, timeSort):
+    '''
+    计算离每个type的平均，方差的时间间隔
+    '''
+    recentDic = {}
+    for thisTime in timeSort:
+        thisType = valueDic[thisTime]
+        con1 = thisType == '10'
+        con2 = thisType == '11'
+        if con1 or con2:
+            totalRange = 0
+            varRange = 0
+            comepareNum = 0
+            rangeList = []
+            for compareTime in timeSort:
+                comepareNum += 1
+                thisRange = int(compareTime)-int(thisTime)
+                totalRange += thisRange
+                varRange += pow(int(compareTime)-int(thisTime), 2)
+                if thisRange > 0:
+                    rangeList.append(thisRange)
+            if comepareNum-1 > 0:
+                avRange = totalRange/float(comepareNum-1)
+                varRange = varRange/float(comepareNum-1)
+            else:
+                avRange = ''
+                varRange = ''
+            minRange = min(rangeList) if len(rangeList) > 0 else ''
+            recentDic[thisType] = {
+                    'av': avRange,
+                    'var': varRange,
+                    'min': minRange,
+                    }
+    return recentDic
 
 
 if __name__ == '__main__':
@@ -230,6 +380,63 @@ if __name__ == '__main__':
                     typeDisDic[useType]['min'] = typeDis
                 elif typeDisDic[useType]['min'] > typeDis:
                     typeDisDic[useType]['min'] = typeDis
+        # 离最近的时间
+        recentTimeDic = get_recent_dic(valueDic, timeSort)
+        recent10 = if_second_in('10', recentTimeDic, 'nowTime')
+        recent11 = if_second_in('11', recentTimeDic, 'nowTime')
+        # 点击类型比例
+        valueCount = np.unique(list(valueDic.values()), return_counts=True)
+        valueCountDic = dict(list(zip(valueCount[0], valueCount[1])))
+        totalCount = float(sum(valueCountDic.values()))
+        type10Per = if_value_in('10', valueCountDic)/totalCount
+        type11Per = if_value_in('11', valueCountDic)/totalCount
+        type10Num = if_value_in('10', valueCountDic)
+        type11Num = if_value_in('11', valueCountDic)
+        # 离最近的距离
+        recentDisDic = get_recent_dis(valueDic, timeSort)
+        recentDis10 = if_value_dic('10', recentDisDic)
+        recentDis11 = if_value_dic('11', recentDisDic)
+        # 类别到类别之间的信息
+        typeToTypeDic = type_to_type()
+        for i in range(1, len(timeSort)):
+            for j in range(0, i):
+                toType = valueDic[timeSort[i]]
+                con1 = toType == '10'
+                con2 = toType == '11'
+                if con1 or con2:
+                    startType = valueDic[timeSort[j]]
+                    con1 = startType != '8'
+                    con2 = startType != '9'
+                    typeDis = int(timeSort[i])-int(timeSort[j])
+                    typeToTypeDic[toType][startType]['num'] += 1
+                    if typeToTypeDic[toType][startType]['max'] == '':
+                        typeToTypeDic[toType][startType]['max'] = typeDis
+                    elif typeToTypeDic[toType][startType]['max'] < typeDis:
+                        typeToTypeDic[toType][startType]['max'] = typeDis
+                    if typeToTypeDic[toType][startType]['min'] == '':
+                        typeToTypeDic[toType][startType]['min'] = typeDis
+                    elif typeToTypeDic[toType][startType]['min'] > typeDis:
+                        typeToTypeDic[toType][startType]['min'] = typeDis
+                    if typeToTypeDic[toType][startType]['av'] == '':
+                        typeToTypeDic[toType][startType]['av'] = typeDis
+                    else:
+                        typeToTypeDic[toType][startType]['av'] + typeDis
+        typeToTypeValue = ''
+        for i in [10, 11]:
+            i = str(i)
+            for j in range(1, 12):
+                j = str(j)
+                for k in ['min', 'max']:
+                    typeToTypeValue += '{},'.format(typeToTypeDic[i][j][k])
+        typeToTypeValue = typeToTypeValue.strip(',')
+        # 方差均值
+        recentRangeDic = get_range(valueDic, timeSort)
+        recentVar10 = if_second_in('10', recentRangeDic, 'var')
+        recentVar11 = if_second_in('11', recentRangeDic, 'var')
+        recentAv10 = if_second_in('10', recentRangeDic, 'av')
+        recentAv11 = if_second_in('11', recentRangeDic, 'av')
+        recentmin10 = if_second_in('10', recentRangeDic, 'min')
+        recentmin11 = if_second_in('11', recentRangeDic, 'min')
         # 储存
         outList = [
                 userId,
@@ -294,6 +501,21 @@ if __name__ == '__main__':
                 str(typeDisDic['7']['max']),
                 str(typeDisDic['8']['max']),
                 str(typeDisDic['9']['max']),
+                str(recent10),
+                str(recent11),
+                str(type10Per),
+                str(type11Per),
+                str(type10Num),
+                str(type11Num),
+                str(recentDis10),
+                str(recentDis11),
+                typeToTypeValue,
+                str(recentVar10),
+                str(recentVar11),
+                str(recentAv10),
+                str(recentAv11),
+                str(recentmin10),
+                str(recentmin11),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

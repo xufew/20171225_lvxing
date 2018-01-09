@@ -42,7 +42,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 70,
-            'num_trees': 400,
+            'num_trees': 500,
             'min_sum_hessian_in_leaf': 0.1,
             'min_data_in_leaf': 50,
             'feature_fraction': 0.3,
@@ -52,8 +52,8 @@ if __name__ == '__main__':
             'num_threads': 4,
             }
     params = few_model.Lightgbm.set_param(params)
-    # # 交叉验证
-    # few_model.Lightgbm.cv(trainX, trainY, params)
+    # 交叉验证
+    few_model.Lightgbm.cv(trainX, trainY, params)
     # 开始训练
     trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
     # 预测
