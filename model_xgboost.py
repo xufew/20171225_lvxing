@@ -9,14 +9,16 @@ import pickle
 import pandas as pd
 
 import few_model
+import delete_feature
 
 
 def predict(modelSavePath, param):
     inputPath = './data/test_use/label_test.csv'
     savePath = './data/tmp_result.csv'
     comparePath = './data/result_compare.csv'
-    finalPath = './data/result.csv'
+    finalPath = './data/result_xgboost.csv'
     testX = pd.read_table(inputPath, sep=',', index_col=0)
+    testX = delete_feature.drop(testX)
     testX = testX.drop(['orderType'], axis=1)
     with open(modelSavePath, 'rb') as fileReader:
         gbdtModel = pickle.load(fileReader)
@@ -37,23 +39,27 @@ if __name__ == '__main__':
     inputPath = './data/train_use/label_train.csv'
     modelSavePath = './model/gbdt_c.pkl'
     trainData = pd.read_table(inputPath, sep=',', index_col=0)
+    # 删除无用纬度和数据
+    delete_feature.delete_na(trainData)
+    trainData = delete_feature.drop(trainData)
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']
     # 开始交叉验证
     setNa = -9999999999999999999
     inputParam = {
+            'eta': 0.05,
             'naData': setNa,
             'scale_pos_weight': 0.2,
             'max_depth': 8,
-            'subsample': 1,
-            'col_sample_bytree': 1,
+            'subsample': 0.5,
+            'col_sample_bytree': 0.3,
             'min_child_weight': 5,
-            'num_roud': 90,
+            'num_roud': 600,
             }
     param = few_model.Xgboost.set_param(inputParam)
     trainX = trainX.fillna(setNa)
-    few_model.Xgboost.cross_validation(trainX, trainY, param)
-    # # 开始训练
-    # few_model.Xgboost.train(trainX, trainY, param, modelSavePath)
+    # few_model.Xgboost.cross_validation(trainX, trainY, param)
+    # 开始训练
+    few_model.Xgboost.train(trainX, trainY, param, modelSavePath)
     # 预测
-    # predict(modelSavePath, param)
+    predict(modelSavePath, param)

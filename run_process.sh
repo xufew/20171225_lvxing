@@ -52,8 +52,8 @@ python3 process_orderHistory.py $ORDER_HISTORY_TRAIN $OUT_ORDER_HISTORY_TRAIN ||
 python3 process_userComment.py $USER_COMMENT_TRAIN $OUT_USER_COMMENT_TRAIN || exit 1
 # 将历史订单信息里面的成单，加到action里面去
 python3 process_combine_his_action.py $ACTION_TRAIN $ORDER_HISTORY_TRAIN $OUT_ACTION_WITH_HISTORY || exit 1
-# # 处理浏览信息
-# python3 process_action.py $ACTION_TRAIN $OUT_ACTION || exit 1
+# 处理浏览信息
+python3 process_action.py $ACTION_TRAIN $OUT_ACTION || exit 1
 # 处理浏览信息增加
 python3 process_action_1.py $OUT_ACTION_WITH_HISTORY $OUT_ACTION_1 || exit 1
 # 进行训练集维度的合并
