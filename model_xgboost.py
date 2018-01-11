@@ -9,7 +9,6 @@ import pickle
 import pandas as pd
 
 import few_model
-import delete_feature
 
 
 def predict(modelSavePath, param):
@@ -18,7 +17,6 @@ def predict(modelSavePath, param):
     comparePath = './data/result_compare.csv'
     finalPath = './data/result_xgboost.csv'
     testX = pd.read_table(inputPath, sep=',', index_col=0)
-    testX = delete_feature.drop(testX)
     testX = testX.drop(['orderType'], axis=1)
     with open(modelSavePath, 'rb') as fileReader:
         gbdtModel = pickle.load(fileReader)
@@ -39,9 +37,6 @@ if __name__ == '__main__':
     inputPath = './data/train_use/label_train.csv'
     modelSavePath = './model/gbdt_c.pkl'
     trainData = pd.read_table(inputPath, sep=',', index_col=0)
-    # 删除无用纬度和数据
-    delete_feature.delete_na(trainData)
-    trainData = delete_feature.drop(trainData)
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']
     # 开始交叉验证

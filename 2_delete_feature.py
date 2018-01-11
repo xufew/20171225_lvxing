@@ -52,6 +52,11 @@ if __name__ == '__main__':
     testPath = './data/test_use/label_test.csv'
     outTrain = './data/train_use/label_train_drop.csv'
     outTest = './data/test_use/label_test_drop.csv'
+    # 处理na
     trainData = read_data(trainPath)
     delete_na(trainData)
     trainData = drop(trainData)
+    trainData.to_csv(outTrain, sep=',')
+    testData = read_data(testPath)
+    testData = drop(testData)
+    testData.to_csv(outTest, sep=',')
