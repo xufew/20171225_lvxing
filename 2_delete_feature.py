@@ -26,12 +26,12 @@ def delete_na(inputData):
     去除na过多的数据
     '''
     # 列
-    columnNaNum = inputData.isna().sum()
+    columnNaNum = inputData.isnull().sum()
     columnNaPer = columnNaNum/float(inputData.shape[0])
     deleteCol = list(columnNaPer[columnNaPer > COLUMN_PER].index)
     DELETE_DIC['column'] += deleteCol
     # 行
-    rowNaNum = inputData.isna().sum(axis=1)
+    rowNaNum = inputData.isnull().sum(axis=1)
     rowNaPer = rowNaNum/float(inputData.shape[1])
     deleteRow = list(rowNaPer[rowNaPer > ROW_PER].index)
     DELETE_DIC['row'] += deleteRow

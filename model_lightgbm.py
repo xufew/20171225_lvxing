@@ -12,13 +12,12 @@ import few_model
 
 
 def predict(modelPath):
-    inputPath = './data/test_use/label_test.csv'
+    inputPath = './data/test_use/label_test_combine.csv'
     savePath = './data/tmp_result.csv'
     comparePath = './data/result_compare.csv'
     finalPath = './data/result_lightgbm.csv'
     testX = pd.read_table(inputPath, sep=',', index_col=0)
     testX = testX.drop(['orderType'], axis=1)
-    print(testX)
     with open(modelPath, 'rb') as fileReader:
         gbmModel = pickle.load(fileReader)
     predictValue = few_model.Lightgbm.predict(testX, gbmModel)
@@ -31,6 +30,7 @@ def predict(modelPath):
                         ).encode('utf8')
                     )
     runAwk = "awk -F',' -v OFS=',' '{if(NR==FNR){a[$1]=$2}else{if(a[$1]){print $1,a[$1]}}}' %s %s > %s" % (savePath, comparePath, finalPath)
+    print(runAwk)
     os.system(runAwk)
 
 
@@ -54,16 +54,15 @@ if __name__ == '__main__':
             'num_threads': 4,
             }
     params = few_model.Lightgbm.set_param(params)
-    # 交叉验证
-    evalDic = few_model.Lightgbm.cv(trainX, trainY, params)
-    print(evalDic)
-    # # 开始训练
-    # trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
-    # with open('./tmp_feature_im', 'wb') as fileWriter:
-    #     for thisIndex in trainModel.featureIm.index:
-    #         value = trainModel.featureIm[thisIndex]
-    #         fileWriter.write(
-    #                 '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
-    #                 )
-    # # 预测
-    # predict(modelPath)
+    # # 交叉验证
+    # evalDic = few_model.Lightgbm.cv(trainX, trainY, params)
+    # 开始训练
+    trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
+    with open('./tmp_feature_im', 'wb') as fileWriter:
+        for thisIndex in trainModel.featureIm.index:
+            value = trainModel.featureIm[thisIndex]
+            fileWriter.write(
+                    '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
+                    )
+    # 预测
+    predict(modelPath)
