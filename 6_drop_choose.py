@@ -24,7 +24,35 @@ if __name__ == '__main__':
             'typeDismax6', 'recentmin5', '1To6Timemin',
             'type5Per', '5To6Timemin', 'recentmax5',
             '1To1Timemin', 'typeDismin5', '5To1Timemin',
-            '6To5Timemin'
+            '6To5Timemin', 'typeDismax6', 'recentmin5', '1To6Timemin',
+            'type5Per', '5To6Timemin', 'recentmax5', '1To1Timemin',
+            'typeDismin5', '5To1Timemin', '6To5Timemin', '女',
+            'orderNum', 'superNum', 'superPer', 'cityPer', 'recent6',
+            'recent7', 'recent8', 'recentDis1', 'recentDis2', 'recentDis3',
+            'recentDis4', 'recentDis5', 'recentDis6', 'recentDis7',
+            'recentVar1', 'recentVar2', 'recentVar5', 'recentVar7',
+            'recentVar8', 'recentAv1', 'lastType6_add_recentmin1',
+            'lastType6_add_typeDismax5', 'lastType6_add_typeDismin6',
+            'lastType6_add_recent1', 'lastType6_add_typeDismin5',
+            'lastType6_add_5To6Timemin', 'lastType6_add_type6Per',
+            'lastType6_add_continueAv5', 'lastType6_add_continueMax6',
+            'lastType6_add_6To1Timemin', 'lastType6_add_6To6Timemax',
+            'lastType6_add_6To1Timemax', 'lastType6_add_typeDismax7',
+            'lastType6_add_居民消费价格指数(上年同月=100)_2017年11月',
+            'lastType6_add_6To5Timemax',
+            'lastType6_add_商品零售价格指数(上年同月=100)_2017年11月',
+            'lastType6_add_typeDismin7', 'lastType6_add_specialLen',
+            'lastType6_add_continueVar6', 'lastType6_add_1To2Timemin',
+            'lastType6_add_1To1Timemax', 'lastType6_add_国内生产总值(亿元)_2014年',
+            'lastType6_add_recentVar5', 'lastType6_add_1To5Timemax',
+            'lastType6_add_社会商品零售总额(亿元)_2015年',
+            'lastType6_add_5To10Timemin', 'lastType6_add_recentmin4',
+            'recentDis10_add_recent10', 'recentDis10_add_recentDis1',
+            'orderNum_add_recentmin5', 'orderNum_add_recentmax6',
+            'orderNum_add_5To10Timemin', 'orderNum_add_5To6Timemin',
+            'orderNum_add_countryPer', 'orderNum_add_type8Per',
+            'orderNum_add_6To10Timemax', 'orderNum_add_recentmin4',
+            'cityPer_add_recentVar8',
             ]
     initialData = trainX.drop(initialList, axis=1)
     #
@@ -49,7 +77,7 @@ if __name__ == '__main__':
         thisTrain = trainX.loc[:, initialList]
         params = few_model.Lightgbm.set_param(params_1)
         evalDic = few_model.Lightgbm.cv(
-                thisTrain, trainY, params, verbose_eval=False
+                thisTrain, trainY, params, verbose_eval=True
                 )
         maxAuc = max(evalDic['auc-mean'])
         if maxAuc > biggestAuc:
