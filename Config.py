@@ -5,8 +5,8 @@
 # ============
 
 
-TRAIN_DATA_PATH = './data/train_use/label_train_drop.csv'
-TEST_DATA_PATH = './data/test_use/label_test_drop.csv'
+TRAIN_DATA_PATH = './data/train_use/label_train_select.csv'
+TEST_DATA_PATH = './data/test_use/label_test_select.csv'
 
 MODEL_LIGHTGBM_CL = './model/lightgbm_cl.pkl'
 MODEL_XGBOOST_C = './model/gbdt_c.pkl'

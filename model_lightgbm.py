@@ -55,15 +55,15 @@ if __name__ == '__main__':
             'scale_pos_weight': 1,
             }
     params = few_model.Lightgbm.set_param(params)
-    # # 交叉验证
-    # evalDic = few_model.Lightgbm.cv(trainX, trainY, params)
-    # 开始训练
-    trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
-    with open('./tmp_feature_im', 'wb') as fileWriter:
-        for thisIndex in trainModel.featureIm.index:
-            value = trainModel.featureIm[thisIndex]
-            fileWriter.write(
-                    '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
-                    )
-    # 预测
-    predict(modelPath)
+    # 交叉验证
+    evalDic = few_model.Lightgbm.cv(trainX, trainY, params)
+    # # 开始训练
+    # trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
+    # with open('./tmp_feature_im', 'wb') as fileWriter:
+    #     for thisIndex in trainModel.featureIm.index:
+    #         value = trainModel.featureIm[thisIndex]
+    #         fileWriter.write(
+    #                 '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
+    #                 )
+    # # 预测
+    # predict(modelPath)
