@@ -9,18 +9,19 @@ import pickle
 import pandas as pd
 
 import few_model
+import Config
 
 
-def predict(modelSavePath, param):
-    inputPath = './data/test_use/label_test.csv'
+def predict(modelSavePath, xgboost):
+    inputPath = Config.TEST_DATA_PATH
     savePath = './data/tmp_result.csv'
-    comparePath = './data/result_compare.csv'
-    finalPath = './data/result_xgboost.csv'
+    comparePath = Config.RESULT_FINAL_TRANS
+    finalPath = Config.RESULT_XGBOOST_C
     testX = pd.read_table(inputPath, sep=',', index_col=0)
     testX = testX.drop(['orderType'], axis=1)
     with open(modelSavePath, 'rb') as fileReader:
         gbdtModel = pickle.load(fileReader)
-    predictValue = few_model.Xgboost.predict(testX, gbdtModel, param)
+    predictValue = xgboost.predict(testX, gbdtModel)
     with open(savePath, 'wb') as fileWriter:
         fileWriter.write('userid,orderType\n'.encode('utf8'))
         for i in range(len(testX.index)):
@@ -29,13 +30,13 @@ def predict(modelSavePath, param):
                         testX.index[i], predictValue[i]
                         ).encode('utf8')
                     )
-    runAwk = "awk -F',' -v OFS=',' '{if(NR==FNR){a[$1]=$2}else{if(a[$1]){print $1,a[$1]}}}' %s %s > %s" % (savePath, comparePath, finalPath)
+    runAwk = "awk -F',' -v OFS=',' '{if(NR==FNR){a[$1]=$2}else{if($1 in a){print $1,a[$1]}}}' %s %s > %s" % (savePath, comparePath, finalPath)
     os.system(runAwk)
 
 
 if __name__ == '__main__':
-    inputPath = './data/train_use/label_train.csv'
-    modelSavePath = './model/gbdt_c.pkl'
+    inputPath = Config.TRAIN_DATA_PATH
+    modelSavePath = Config.MODEL_XGBOOST_C
     trainData = pd.read_table(inputPath, sep=',', index_col=0)
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']
@@ -49,12 +50,12 @@ if __name__ == '__main__':
             'subsample': 0.5,
             'col_sample_bytree': 0.3,
             'min_child_weight': 5,
-            'num_roud': 600,
+            'num_roud': 300,
+            'objective': 'reg:linear',
             }
-    param = few_model.Xgboost.set_param(inputParam)
-    trainX = trainX.fillna(setNa)
-    # few_model.Xgboost.cross_validation(trainX, trainY, param)
+    xgboost = few_model.Xgboost(inputParam)
+    # xgboost.cv(trainX, trainY)
     # 开始训练
-    few_model.Xgboost.train(trainX, trainY, param, modelSavePath)
+    xgboost.train(trainX, trainY, modelSavePath)
     # 预测
-    predict(modelSavePath, param)
+    predict(modelSavePath, xgboost)

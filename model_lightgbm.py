@@ -9,13 +9,14 @@ import pickle
 import pandas as pd
 
 import few_model
+import Config
 
 
 def predict(modelPath):
-    inputPath = './data/test_use/label_test_combine.csv'
+    inputPath = Config.TEST_DATA_PATH
     savePath = './data/tmp_result.csv'
-    comparePath = './data/result_compare.csv'
-    finalPath = './data/result_lightgbm.csv'
+    comparePath = Config.RESULT_FINAL_TRANS
+    finalPath = Config.RESULT_LIGHTGBM_CL
     testX = pd.read_table(inputPath, sep=',', index_col=0)
     testX = testX.drop(['orderType'], axis=1)
     with open(modelPath, 'rb') as fileReader:
@@ -29,14 +30,13 @@ def predict(modelPath):
                         testX.index[i], predictValue[i]
                         ).encode('utf8')
                     )
-    runAwk = "awk -F',' -v OFS=',' '{if(NR==FNR){a[$1]=$2}else{if(a[$1]){print $1,a[$1]}}}' %s %s > %s" % (savePath, comparePath, finalPath)
-    print(runAwk)
+    runAwk = "awk -F',' -v OFS=',' '{if(NR==FNR){a[$1]=$2}else{if($1 in a){print $1,a[$1]}}}' %s %s > %s" % (savePath, comparePath, finalPath)
     os.system(runAwk)
 
 
 if __name__ == '__main__':
-    inputPath = './data/train_use/label_train_combine.csv'
-    modelPath = './model/lightgbm.pkl'
+    inputPath = Config.TRAIN_DATA_PATH
+    modelPath = Config.MODEL_LIGHTGBM_CL
     trainData = pd.read_table(inputPath, sep=',', index_col=0)
     # 删除无用纬度和数据
     trainX = trainData.drop(['orderType'], axis=1)
@@ -52,6 +52,7 @@ if __name__ == '__main__':
             'lambda_l1': 0,
             'lambda_l2': 10,
             'num_threads': 4,
+            'scale_pos_weight': 1,
             }
     params = few_model.Lightgbm.set_param(params)
     # # 交叉验证
