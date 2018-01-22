@@ -52,7 +52,11 @@ if __name__ == '__main__':
             'orderNum_add_5To10Timemin', 'orderNum_add_5To6Timemin',
             'orderNum_add_countryPer', 'orderNum_add_type8Per',
             'orderNum_add_6To10Timemax', 'orderNum_add_recentmin4',
-            'cityPer_add_recentVar8',
+            'cityPer_add_recentVar8', '男', '重庆', 'lastThreeType5',
+            'lastThreeType6', '4To5Timemax', 'continueVar3',
+            'nearSuper_add_type6Per', 'simplePer_add_recentDis1',
+            'simpleNum_add_recentmin9', 'lastType6_add_go9Time',
+            'recentDis1_mul_continueMin6', 'recentDis1_mul_recent5',
             ]
     initialData = trainX.drop(initialList, axis=1)
     #
