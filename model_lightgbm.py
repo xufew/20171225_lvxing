@@ -6,6 +6,7 @@
 import os
 import pickle
 
+import numpy as np
 import pandas as pd
 
 import few_model
@@ -34,6 +35,21 @@ def predict(modelPath):
     os.system(runAwk)
 
 
+def line_search(trainX, trainY):
+    searchDic = {
+            'learning_rate': [0.05],
+            'num_leaves': list(range(30, 100, 10)),
+            'bagging_fraction': [0.3],
+            'feature_fraction': [0.5],
+            'lambda_l2': np.linspace(1, 50, 10),
+            'min_data_in_leaf': list(range(50, 150, 20)),
+            'min_sum_hessian_in_leaf': np.linspace(0.01, 0.2, 5),
+            'num_trees': [1000],
+            'application': ['binary'],
+            }
+    lightgbm.line_search(trainX, trainY, searchDic)
+
+
 if __name__ == '__main__':
     inputPath = Config.TRAIN_DATA_PATH
     modelPath = Config.MODEL_LIGHTGBM_CL
@@ -44,7 +60,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 70,
-            'num_trees': 470,
+            'num_trees': 1000,
             'min_sum_hessian_in_leaf': 0.1,
             'min_data_in_leaf': 50,
             'feature_fraction': 0.3,
@@ -54,9 +70,9 @@ if __name__ == '__main__':
             'num_threads': 4,
             'scale_pos_weight': 1,
             }
-    params = few_model.Lightgbm.set_param(params)
-    # 交叉验证
-    evalDic = few_model.Lightgbm.cv(trainX, trainY, params)
+    lightgbm = few_model.Lightgbm(params)
+    # # 交叉验证
+    # evalDic = lightgbm.cv(trainX, trainY)
     # # 开始训练
     # trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
     # with open('./tmp_feature_im', 'wb') as fileWriter:
@@ -67,3 +83,5 @@ if __name__ == '__main__':
     #                 )
     # # 预测
     # predict(modelPath)
+    # 寻找最优变量
+    line_search(trainX, trainY)

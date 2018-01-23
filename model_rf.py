@@ -61,6 +61,6 @@ if __name__ == '__main__':
             'verbose': 1,
             }
     rf = few_model.RF(param)
-    # rf.cv(trainX, trainY)
+    rf.cv(trainX, trainY)
     # rf.train(trainX, trainY, modelPath)
-    predict(modelPath, rf, naProducer)
+    # predict(modelPath, rf, naProducer)

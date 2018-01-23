@@ -6,6 +6,7 @@
 import os
 import pickle
 
+import numpy as np
 import pandas as pd
 
 import few_model
@@ -34,6 +35,20 @@ def predict(modelSavePath, xgboost):
     os.system(runAwk)
 
 
+def line_search(trainX, trainY):
+    searchDic = {
+            'eta': [0.05],
+            'max_depth': list(range(3, 10)),
+            'subsample': np.linspace(0.3, 1, 5),
+            'col_sample_bytree': np.linspace(0.3, 1, 5),
+            'min_child_weight': list(range(1, 50, 5)),
+            'reg_lambda': np.linspace(1, 50, 5),
+            'num_roud': [5],
+            'objective': ['binary:logistic'],
+            }
+    xgboost.line_search(trainX, trainY, searchDic)
+
+
 if __name__ == '__main__':
     inputPath = Config.TRAIN_DATA_PATH
     modelSavePath = Config.MODEL_XGBOOST_C
@@ -45,17 +60,19 @@ if __name__ == '__main__':
     inputParam = {
             'eta': 0.05,
             'naData': setNa,
-            'scale_pos_weight': 0.2,
+            'scale_pos_weight': 1,
             'max_depth': 8,
             'subsample': 0.5,
             'col_sample_bytree': 0.3,
             'min_child_weight': 5,
-            'num_roud': 300,
+            'num_roud': 2,
             'objective': 'reg:linear',
             }
     xgboost = few_model.Xgboost(inputParam)
     # xgboost.cv(trainX, trainY)
-    # 开始训练
-    xgboost.train(trainX, trainY, modelSavePath)
-    # 预测
-    predict(modelSavePath, xgboost)
+    # # 开始训练
+    # xgboost.train(trainX, trainY, modelSavePath)
+    # # 预测
+    # predict(modelSavePath, xgboost)
+    # 进行最佳搜索
+    line_search(trainX, trainY)
