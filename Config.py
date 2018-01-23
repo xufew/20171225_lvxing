@@ -11,6 +11,7 @@ TEST_DATA_PATH = './data/test_use/label_test_select.csv'
 MODEL_LIGHTGBM_CL = './model/lightgbm_cl.pkl'
 MODEL_XGBOOST_C = './model/gbdt_c.pkl'
 MODEL_RF = './model/rf.pkl'
+MODEL_LR = './model/lr.pkl'
 MODEL_COMBINE = './model/combine.pkl'
 
 RESULT_FINAL_TRANS = './data/result_compare.csv'

@@ -14,67 +14,35 @@ import few_model
 import Config
 
 
-class Lightgbm_c:
-    def __init__(self):
-        params = {
-                'learning_rate': 0.05,
-                'num_leaves': 70,
-                'num_trees': 370,
-                'min_sum_hessian_in_leaf': 0.1,
-                'min_data_in_leaf': 50,
-                'feature_fraction': 0.3,
-                'bagging_fraction': 0.5,
-                'lambda_l1': 0,
-                'lambda_l2': 10,
-                'num_threads': 4,
-                }
-        self.params = few_model.Lightgbm.set_param(params)
-        self.modelpath = './model/tmp_lightgbmc.pkl'
-
-    def cv(self, trainX, trainY):
-        few_model.Lightgbm.cv(trainX, trainY, self.params)
-
-    def train(self, trainX, trainY):
-        few_model.Lightgbm.train(
-                trainX, trainY, self.params, self.modelpath
-                )
-
-    def predict(self, testX):
-        with open(self.modelpath, 'rb') as fileReader:
-            model = pickle.load(fileReader)
-        predictValue = few_model.Lightgbm.predict(testX, model)
-        return predictValue
+lightgbm_c_param = {
+        'learning_rate': 0.05,
+        'num_leaves': 70,
+        'num_trees': 370,
+        'min_sum_hessian_in_leaf': 0.1,
+        'min_data_in_leaf': 50,
+        'feature_fraction': 0.3,
+        'bagging_fraction': 0.5,
+        'lambda_l1': 0,
+        'lambda_l2': 10,
+        'num_threads': 4,
+        }
+lightgbm_c = few_model.Lightgbm(lightgbm_c_param)
+lightgbm_c_path = './model/tmp_lightgbmc.pkl'
 
 
-class Xgboost_c:
-    def __init__(self):
-        setNa = -9999999999999999999
-        inputParam = {
-                'eta': 0.05,
-                'naData': setNa,
-                'scale_pos_weight': 0.2,
-                'max_depth': 8,
-                'subsample': 0.5,
-                'col_sample_bytree': 0.3,
-                'min_child_weight': 5,
-                'num_roud': 300,
-                'objective': 'reg:linear',
-                }
-        self.model = few_model.Xgboost(inputParam)
-        self.modelpath = './model/tmp_xgboostc.pkl'
-
-    def cv(self, trainX, trainY):
-        trainX = trainX.fillna(self.param['naData'])
-        self.model.cv(trainX, trainY)
-
-    def train(self, trainX, trainY):
-        self.model.train(trainX, trainY, self.modelpath)
-
-    def predict(self, testX):
-        with open(self.modelpath, 'rb') as fileReader:
-            model = pickle.load(fileReader)
-        predictValue = self.model.predict(testX, model)
-        return predictValue
+xgboost_c_param = {
+        'eta': 0.05,
+        'naData': -9999999999,
+        'scale_pos_weight': 0.2,
+        'max_depth': 8,
+        'subsample': 0.5,
+        'col_sample_bytree': 0.3,
+        'min_child_weight': 5,
+        'num_roud': 300,
+        'objective': 'binary:logistic',
+        }
+xgboost_c = few_model.Xgboost(xgboost_c_param)
+xgboost_c_path = './model/tmp_xgboostc.pkl'
 
 
 class RF:
@@ -151,6 +119,12 @@ def predict_up(lr):
     os.system(runAwk)
 
 
+def load_model(modelPath):
+    with open(modelPath, 'rb') as fileReader:
+        model = pickle.load(fileReader)
+    return model
+
+
 if __name__ == '__main__':
     # 第一次获取
     trainData = pd.read_table(Config.TRAIN_DATA_PATH, sep=',', index_col=0)
@@ -165,19 +139,19 @@ if __name__ == '__main__':
         testX = test.drop(['orderType'], axis=1)
         testY = test['orderType']
         # 初始化模型
-        lightgbmC = Lightgbm_c()
-        xgboostC = Xgboost_c()
         rf = RF(trainX)
         # 训练模型
         # lightgbmC.cv(trainX, trainY)
-        lightgbmC.train(trainX.copy(), trainY)
-        # xgboostC.cv(trainX, trainY)
-        xgboostC.train(trainX.copy(), trainY)
+        lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
+        # xgboost_c.cv(trainX, trainY)
+        xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
         # rf.cv(trainX, trainY)
         rf.train(trainX.copy(), trainY)
         # 预测的结果进行拼装，准备进行第二次训练
-        predictLightgbmC = lightgbmC.predict(testX)
-        predictXgboostC = xgboostC.predict(testX)
+        predictLightgbmC = lightgbm_c.predict(
+                testX, load_model(lightgbm_c_path)
+                )
+        predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
         predictRf = rf.predict(testX)
         # 进行拼装
         testTrain = pd.DataFrame(
