@@ -38,12 +38,12 @@ def predict(modelSavePath, xgboost):
 def line_search(trainX, trainY):
     searchDic = {
             'eta': [0.05],
-            'max_depth': list(range(3, 10)),
-            'subsample': np.linspace(0.3, 1, 5),
-            'col_sample_bytree': np.linspace(0.3, 1, 5),
+            'max_depth': list(range(4, 10)),
+            'subsample': [0.5],
+            'col_sample_bytree': [0.4],
             'min_child_weight': list(range(1, 50, 5)),
             'reg_lambda': np.linspace(1, 50, 5),
-            'num_roud': [5],
+            'num_roud': [1000],
             'objective': ['binary:logistic'],
             }
     xgboost.line_search(trainX, trainY, searchDic)
@@ -63,10 +63,10 @@ if __name__ == '__main__':
             'scale_pos_weight': 1,
             'max_depth': 8,
             'subsample': 0.5,
-            'col_sample_bytree': 0.3,
+            'col_sample_bytree': 0.4,
             'min_child_weight': 5,
-            'num_roud': 2,
-            'objective': 'reg:linear',
+            'num_roud': 1000,
+            'objective': 'binary:logistic',
             }
     xgboost = few_model.Xgboost(inputParam)
     # xgboost.cv(trainX, trainY)
