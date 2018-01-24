@@ -17,6 +17,7 @@ MODEL_COMBINE = './model/combine.pkl'
 
 RESULT_FINAL_TRANS = './data/result_compare.csv'
 RESULT_LIGHTGBM_CL = './data/result_lightgbm_cl.csv'
+RESULT_LIGHTGBM_R = './data/result_lightgbm_r.csv'
 RESULT_XGBOOST_C = './data/result_xgboost_c.csv'
 RESULT_RF = './data/result_rf.csv'
 RESULT_COMBINE = './data/result_combine.csv'

@@ -17,12 +17,12 @@ def predict(modelPath):
     inputPath = Config.TEST_DATA_PATH
     savePath = './data/tmp_result.csv'
     comparePath = Config.RESULT_FINAL_TRANS
-    finalPath = Config.RESULT_LIGHTGBM_CL
+    finalPath = Config.RESULT_LIGHTGBM_R
     testX = pd.read_table(inputPath, sep=',', index_col=0)
     testX = testX.drop(['orderType'], axis=1)
     with open(modelPath, 'rb') as fileReader:
         gbmModel = pickle.load(fileReader)
-    predictValue = few_model.Lightgbm.predict(testX, gbmModel)
+    predictValue = lightgbm.predict(testX, gbmModel)
     with open(savePath, 'wb') as fileWriter:
         fileWriter.write('userid,orderType\n'.encode('utf8'))
         for i in range(len(testX.index)):
@@ -59,29 +59,30 @@ if __name__ == '__main__':
     trainY = trainData['orderType']
     params = {
             'learning_rate': 0.05,
-            'num_leaves': 70,
-            'num_trees': 1000,
-            'min_sum_hessian_in_leaf': 0.1,
+            'num_leaves': 50,
+            'num_trees': 300,
+            'min_sum_hessian_in_leaf': 0.0575,
             'min_data_in_leaf': 50,
-            'feature_fraction': 0.3,
-            'bagging_fraction': 0.5,
+            'bagging_fraction': 0.3,
+            'feature_fraction': 0.5,
             'lambda_l1': 0,
-            'lambda_l2': 10,
+            'lambda_l2': 39.11,
             'num_threads': 4,
             'scale_pos_weight': 1,
+            'application': 'regression',
             }
     lightgbm = few_model.Lightgbm(params)
     # # 交叉验证
     # evalDic = lightgbm.cv(trainX, trainY)
-    # # 开始训练
-    # trainModel = few_model.Lightgbm.train(trainX, trainY, params, modelPath)
-    # with open('./tmp_feature_im', 'wb') as fileWriter:
-    #     for thisIndex in trainModel.featureIm.index:
-    #         value = trainModel.featureIm[thisIndex]
-    #         fileWriter.write(
-    #                 '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
-    #                 )
-    # # 预测
-    # predict(modelPath)
-    # 寻找最优变量
-    line_search(trainX, trainY)
+    # 开始训练
+    trainModel = lightgbm.train(trainX, trainY, modelPath)
+    with open('./tmp_feature_im', 'wb') as fileWriter:
+        for thisIndex in trainModel.featureIm.index:
+            value = trainModel.featureIm[thisIndex]
+            fileWriter.write(
+                    '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
+                    )
+    # 预测
+    predict(modelPath)
+    # # 寻找最优变量
+    # line_search(trainX, trainY)
