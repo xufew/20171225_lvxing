@@ -6,6 +6,8 @@
 import sys
 import pickle
 
+import few_model
+
 
 def process_line(stringList, userDic, cityPer, countryPer, continentPer):
     userId = stringList[0]
@@ -42,6 +44,10 @@ def process_line(stringList, userDic, cityPer, countryPer, continentPer):
         userDic[userId]['countryPer'] = countryPer[country]
     if continent in continentPer:
         userDic[userId]['continentPer'] = continentPer[continent]
+    # 不同时间去的不同城市
+    userDic[userId]['timeGoDic'][orderTime] = {
+            'city': city, 'country': country, 'continent': continent
+            }
 
 
 def __init_user():
@@ -55,6 +61,7 @@ def __init_user():
             'cityPer': '',
             'countryPer': '',
             'continentPer': '',
+            'timeGoDic': {},        # 不同时间去的不同地方
             }
     return outDic
 
@@ -72,10 +79,24 @@ def read_go_dic():
     return city, country, continent
 
 
+def read_go_key():
+    '''
+    读取每个城市对应的值key
+    '''
+    with open('./continent_key.pkl', 'rb') as fileReader:
+        continent = pickle.load(fileReader)
+    with open('./country_key.pkl', 'rb') as fileReader:
+        country = pickle.load(fileReader)
+    with open('./city_key.pkl', 'rb') as fileReader:
+        city = pickle.load(fileReader)
+    return city, country, continent
+
+
 if __name__ == '__main__':
     orderHistoryPath = sys.argv[1]
     outPath = sys.argv[2]
     cityPer, countryPer, continentPer = read_go_dic()
+    cityKey, countryKey, continentKey = read_go_key()
     with open(orderHistoryPath, 'rb') as fileReader:
         count = 0
         userDic = {}
@@ -111,6 +132,15 @@ if __name__ == '__main__':
                     'cityPer',
                     'countryPer',
                     'continentPer',
+                    few_model.Preprocessor.get_one_hot_name(
+                        cityKey, 'finalGoCity_'
+                        ),
+                    few_model.Preprocessor.get_one_hot_name(
+                        countryKey, 'finalGoCity_'
+                        ),
+                    few_model.Preprocessor.get_one_hot_name(
+                        continentKey, 'finalGoCity_'
+                        ),
                     ]
             fileWriter.write(
                     '{}\n'.format(','.join(nameList)).encode('utf8')
@@ -122,6 +152,18 @@ if __name__ == '__main__':
         simpleNum = infoDic['simpleNum']
         # 精品订单占比
         superPer = superNum/float(orderNum)
+        # 去的不同城市的编码
+        timeSort = sorted(infoDic['timeGoDic'].keys())
+        finalGoCity = infoDic['timeGoDic'][timeSort[-1]]['city']
+        finalGoCountry = infoDic['timeGoDic'][timeSort[-1]]['country']
+        finalGoContinent = infoDic['timeGoDic'][timeSort[-1]]['continent']
+        finalGoCity = few_model.Preprocessor.one_hot(cityKey, finalGoCity)
+        finalGoCountry = few_model.Preprocessor.one_hot(
+                countryKey, finalGoCountry
+                )
+        finalGoContinent = few_model.Preprocessor.one_hot(
+                continentKey, finalGoContinent
+                )
         outList = [
                 userId,
                 str(orderNum),
@@ -133,6 +175,9 @@ if __name__ == '__main__':
                 str(infoDic['cityPer']),
                 str(infoDic['countryPer']),
                 str(infoDic['continentPer']),
+                str(finalGoCity),
+                str(finalGoCountry),
+                str(finalGoContinent),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

@@ -7,6 +7,8 @@ import sys
 
 import numpy as np
 
+import few_base
+
 
 def if_second_in(typeNum, valueDic, valueName):
     if typeNum in valueDic:
@@ -184,6 +186,21 @@ def write_feature_name(fileWriter):
             'firstTypeDate10',
             'firstTypeDate11',
             'firstTypeDate12',
+            'finalSecondDate',
+            'finalThirdDate',
+            'lastDayNum',
+            'lastDayActionNum1',
+            'lastDayActionNum2',
+            'lastDayActionNum3',
+            'lastDayActionNum4',
+            'lastDayActionNum5',
+            'lastDayActionNum6',
+            'lastDayActionNum7',
+            'lastDayActionNum8',
+            'lastDayActionNum9',
+            'lastDayActionNum10',
+            'lastDayActionNum11',
+            'lastDayActionNum12',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -373,10 +390,29 @@ def first_type_date():
     return firstTypeDate
 
 
+def last_day_action():
+    lastDayActionNum = {
+            '1': 0,
+            '2': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0,
+            '6': 0,
+            '7': 0,
+            '8': 0,
+            '9': 0,
+            '10': 0,
+            '11': 0,
+            '12': 0,
+            }
+    return lastDayActionNum
+
+
 if __name__ == '__main__':
     actionPath = sys.argv[1]
     outPath = sys.argv[2]
     fileWriter = open(outPath, 'wb')
+    timer = few_base.Timer()
     # 读取全部信息
     userDic = read_userDic(actionPath)
     # 写feature名
@@ -418,6 +454,9 @@ if __name__ == '__main__':
         typeDisDic = to_type_time()
         finalTypeDate = final_type_date()
         firstTypeDate = first_type_date()
+        lastDayActionNum = last_day_action()
+        lastDay = timer.trans_unix_to_string(timeSort[-1], format='%Y%m%d')
+        lastDayNum = 0
         for i, thisTime in enumerate(timeSort):
             thisType = valueDic[thisTime]
             con1 = thisType == '9'
@@ -451,6 +490,15 @@ if __name__ == '__main__':
                     else:
                         if int(thisTime) < int(firstTypeDate['12']):
                             firstTypeDate['12'] = thisTime
+            # 统计最后一天发生了多少次action操作
+            thisDay = timer.trans_unix_to_string(thisTime, format='%Y%m%d')
+            if int(thisDay) == int(lastDay):
+                lastDayNum += 1
+                lastDayActionNum[thisType] += 1
+                if (thisType == '9') or (thisType == '10') or (
+                        thisType == '11'
+                        ):
+                    lastDayActionNum['12'] += 1
             if con3:
                 go9Time += int(timeSort[i+1])-int(timeSort[i])
             if con1 or con2:
@@ -536,6 +584,14 @@ if __name__ == '__main__':
         recentmin11 = if_second_in('11', recentRangeDic, 'min')
         # 第一次的时间，最后一次的时间
         firstDate = timeSort[0]
+        if len(timeSort) >= 2:
+            finalSecondDate = timeSort[-2]
+        else:
+            finalSecondDate = ''
+        if len(timeSort) >= 3:
+            finalThirdDate = timeSort[-3]
+        else:
+            finalThirdDate = ''
         finalDate = timeSort[-1]
         # 储存
         outList = [
@@ -642,6 +698,21 @@ if __name__ == '__main__':
                 str(firstTypeDate['10']),
                 str(firstTypeDate['11']),
                 str(firstTypeDate['12']),
+                str(finalSecondDate),
+                str(finalThirdDate),
+                str(lastDayNum),                    # 最后一天发生了多少次action操作
+                str(lastDayActionNum['1']),
+                str(lastDayActionNum['2']),
+                str(lastDayActionNum['3']),
+                str(lastDayActionNum['4']),
+                str(lastDayActionNum['5']),
+                str(lastDayActionNum['6']),
+                str(lastDayActionNum['7']),
+                str(lastDayActionNum['8']),
+                str(lastDayActionNum['9']),
+                str(lastDayActionNum['10']),
+                str(lastDayActionNum['11']),
+                str(lastDayActionNum['12']),
                 ]
 
         fileWriter.write(
