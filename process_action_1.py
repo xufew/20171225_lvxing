@@ -79,7 +79,7 @@ def write_feature_name(fileWriter):
             j = str(j)
             for k in ['min', 'max']:
                 typeToTypeName += '{}To{}Time{},'.format(j, i, k)
-    typeToTypeName = typeToTypeName.strip(',')
+    typeToTypeName = typeToTypeName[:-1]
     featureList = [
             'userid',
             'justType1',
@@ -169,6 +169,21 @@ def write_feature_name(fileWriter):
             'finalTypeDate9',
             'finalTypeDate10',
             'finalTypeDate11',
+            'finalTypeDate12',
+            'firstDate',
+            'finalDate',
+            'firstTypeDate1',
+            'firstTypeDate2',
+            'firstTypeDate3',
+            'firstTypeDate4',
+            'firstTypeDate5',
+            'firstTypeDate6',
+            'firstTypeDate7',
+            'firstTypeDate8',
+            'firstTypeDate9',
+            'firstTypeDate10',
+            'firstTypeDate11',
+            'firstTypeDate12',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -332,8 +347,30 @@ def final_type_date():
             '9': '',
             '10': '',
             '11': '',
+            '12': '',
             }
     return finalTypeDate
+
+
+def first_type_date():
+    '''
+    最终最近一次的，不同type的具体时间
+    '''
+    firstTypeDate = {
+            '1': '',
+            '2': '',
+            '3': '',
+            '4': '',
+            '5': '',
+            '6': '',
+            '7': '',
+            '8': '',
+            '9': '',
+            '10': '',
+            '11': '',
+            '12': '',
+            }
+    return firstTypeDate
 
 
 if __name__ == '__main__':
@@ -380,6 +417,7 @@ if __name__ == '__main__':
         continueDic = continue_dic()
         typeDisDic = to_type_time()
         finalTypeDate = final_type_date()
+        firstTypeDate = first_type_date()
         for i, thisTime in enumerate(timeSort):
             thisType = valueDic[thisTime]
             con1 = thisType == '9'
@@ -392,6 +430,27 @@ if __name__ == '__main__':
             else:
                 if int(thisTime) > int(finalTypeDate[thisType]):
                     finalTypeDate[thisType] = thisTime
+                if (thisType == '9') or (thisType == '10') or (
+                        thisType == '11'
+                        ):
+                    if len(finalTypeDate['12']) == 0:
+                        finalTypeDate['12'] = thisTime
+                    else:
+                        if int(thisTime) > int(finalTypeDate['12']):
+                            finalTypeDate['12'] = thisTime
+            if len(firstTypeDate[thisType]) == 0:
+                firstTypeDate[thisType] = thisTime
+            else:
+                if int(thisTime) < int(firstTypeDate[thisType]):
+                    firstTypeDate[thisType] = thisTime
+                if (thisType == '9') or (thisType == '10') or (
+                        thisType == '11'
+                        ):
+                    if len(firstTypeDate['12']) == 0:
+                        firstTypeDate['12'] = thisTime
+                    else:
+                        if int(thisTime) < int(firstTypeDate['12']):
+                            firstTypeDate['12'] = thisTime
             if con3:
                 go9Time += int(timeSort[i+1])-int(timeSort[i])
             if con1 or con2:
@@ -466,7 +525,7 @@ if __name__ == '__main__':
                 j = str(j)
                 for k in ['min', 'max']:
                     typeToTypeValue += '{},'.format(typeToTypeDic[i][j][k])
-        typeToTypeValue = typeToTypeValue.strip(',')
+        typeToTypeValue = typeToTypeValue[:-1]
         # 方差均值
         recentRangeDic = get_range(valueDic, timeSort)
         recentVar10 = if_second_in('10', recentRangeDic, 'var')
@@ -475,6 +534,9 @@ if __name__ == '__main__':
         recentAv11 = if_second_in('11', recentRangeDic, 'av')
         recentmin10 = if_second_in('10', recentRangeDic, 'min')
         recentmin11 = if_second_in('11', recentRangeDic, 'min')
+        # 第一次的时间，最后一次的时间
+        firstDate = timeSort[0]
+        finalDate = timeSort[-1]
         # 储存
         outList = [
                 userId,
@@ -565,7 +627,23 @@ if __name__ == '__main__':
                 str(finalTypeDate['9']),
                 str(finalTypeDate['10']),
                 str(finalTypeDate['11']),
+                str(finalTypeDate['12']),
+                str(firstDate),
+                str(finalDate),
+                str(firstTypeDate['1']),
+                str(firstTypeDate['2']),
+                str(firstTypeDate['3']),
+                str(firstTypeDate['4']),
+                str(firstTypeDate['5']),
+                str(firstTypeDate['6']),
+                str(firstTypeDate['7']),
+                str(firstTypeDate['8']),
+                str(firstTypeDate['9']),
+                str(firstTypeDate['10']),
+                str(firstTypeDate['11']),
+                str(firstTypeDate['12']),
                 ]
+
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')
                 )

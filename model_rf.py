@@ -54,7 +54,7 @@ if __name__ == '__main__':
             'criterion': 'gini',
             'max_features': 'auto',
             'max_depth': None,
-            'min_samples_split': 2,
+            'min_samples_split': 10,
             'min_samples_leaf': 2,
             'min_weight_fraction_leaf': 0,
             'n_jobs': 4,
@@ -62,6 +62,6 @@ if __name__ == '__main__':
             }
     rf = few_model.RF(param)
     # rf.cv(trainX, trainY)
-    rf.line_search(trainX, trainY)
-    # rf.train(trainX, trainY, modelPath)
-    # predict(modelPath, rf, naProducer)
+    # rf.line_search(trainX, trainY)
+    rf.train(trainX, trainY, modelPath)
+    predict(modelPath, rf, naProducer)

@@ -195,7 +195,7 @@ if __name__ == '__main__':
             j = str(j)
             for k in ['min', 'max']:
                 typeToTypeName += '{}To{}Time{},'.format(j, i, k)
-    typeToTypeName = typeToTypeName.strip(',')
+    typeToTypeName = typeToTypeName[:-1]
     nameList = [
             'userid',
             get_hot_name(typeDic, 'lastType'),
@@ -457,7 +457,7 @@ if __name__ == '__main__':
                 j = str(j)
                 for k in ['min', 'max']:
                     typeToTypeValue += '{},'.format(typeToTypeDic[i][j][k])
-        typeToTypeValue = typeToTypeValue.strip(',')
+        typeToTypeValue = typeToTypeValue[:-1]
         outList = [
                 userId,
                 lastType,                   # 最后一个类型

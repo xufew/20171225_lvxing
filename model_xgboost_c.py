@@ -66,14 +66,14 @@ if __name__ == '__main__':
             'col_sample_bytree': 0.4,
             'min_child_weight': 1,
             'reg_lambda': 13.25,
-            'num_roud': 1000,
+            'num_roud': 700,
             'objective': 'binary:logistic',
             }
     xgboost = few_model.Xgboost(inputParam)
-    xgboost.cv(trainX, trainY)
-    # # 开始训练
-    # xgboost.train(trainX, trainY, modelSavePath)
-    # # 预测
-    # predict(modelSavePath, xgboost)
+    # xgboost.cv(trainX, trainY)
+    # 开始训练
+    xgboost.train(trainX, trainY, modelSavePath)
+    # 预测
+    predict(modelSavePath, xgboost)
     # # 进行最佳搜索
     # line_search(trainX, trainY)

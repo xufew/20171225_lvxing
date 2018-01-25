@@ -14,46 +14,75 @@ import few_model
 import Config
 
 
-lightgbm_c_param = {
-        'learning_rate': 0.05,
-        'num_leaves': 70,
-        'num_trees': 370,
-        'min_sum_hessian_in_leaf': 0.1,
-        'min_data_in_leaf': 50,
-        'feature_fraction': 0.3,
-        'bagging_fraction': 0.5,
-        'lambda_l1': 0,
-        'lambda_l2': 10,
-        'num_threads': 4,
-        }
-lightgbm_c = few_model.Lightgbm(lightgbm_c_param)
 lightgbm_c_path = './model/tmp_lightgbmc.pkl'
-
-
-xgboost_c_param = {
-        'eta': 0.05,
-        'naData': -9999999999,
-        'scale_pos_weight': 0.2,
-        'max_depth': 8,
-        'subsample': 0.5,
-        'col_sample_bytree': 0.3,
-        'min_child_weight': 5,
-        'num_roud': 300,
-        'objective': 'binary:logistic',
-        }
-xgboost_c = few_model.Xgboost(xgboost_c_param)
+lightgbm_r_path = './model/tmp_lightgbmr.pkl'
 xgboost_c_path = './model/tmp_xgboostc.pkl'
+
+
+def get_lightgbm_c():
+    lightgbm_c_param = {
+            'learning_rate': 0.05,
+            'num_leaves': 60,
+            'num_trees': 470,
+            'min_sum_hessian_in_leaf': 0.2,
+            'min_data_in_leaf': 70,
+            'bagging_fraction': 0.5,
+            'feature_fraction': 0.3,
+            'lambda_l1': 0,
+            'lambda_l2': 11.88,
+            'num_threads': 4,
+            'scale_pos_weight': 1,
+            'application': 'binary',
+            }
+    lightgbm_c = few_model.Lightgbm(lightgbm_c_param)
+    return lightgbm_c
+
+
+def get_lightgbm_r():
+    lightgbm_r_param = {
+            'learning_rate': 0.05,
+            'num_leaves': 50,
+            'num_trees': 420,
+            'min_sum_hessian_in_leaf': 0.0575,
+            'min_data_in_leaf': 50,
+            'bagging_fraction': 0.3,
+            'feature_fraction': 0.5,
+            'lambda_l1': 0,
+            'lambda_l2': 39.11,
+            'num_threads': 4,
+            'scale_pos_weight': 1,
+            'application': 'regression',
+            }
+    lightgbm_r = few_model.Lightgbm(lightgbm_r_param)
+    return lightgbm_r
+
+
+def get_xgboost_c():
+    xgboost_c_param = {
+            'eta': 0.05,
+            'naData': -9999999,
+            'scale_pos_weight': 1,
+            'max_depth': 6,
+            'subsample': 0.5,
+            'col_sample_bytree': 0.4,
+            'min_child_weight': 1,
+            'reg_lambda': 13.25,
+            'num_roud': 700,
+            'objective': 'binary:logistic',
+            }
+    xgboost_c = few_model.Xgboost(xgboost_c_param)
+    return xgboost_c
 
 
 class RF:
     def __init__(self, trainX):
         param = {
-                'n_estimators': 300,
+                'n_estimators': 700,
                 'criterion': 'gini',
                 'max_features': 'auto',
                 'max_depth': None,
-                'min_samples_split': 15,
-                'min_samples_leaf': 5,
+                'min_samples_split': 10,
+                'min_samples_leaf': 2,
                 'min_weight_fraction_leaf': 0,
                 'n_jobs': 4,
                 'verbose': 1,
@@ -139,17 +168,21 @@ if __name__ == '__main__':
         testX = test.drop(['orderType'], axis=1)
         testY = test['orderType']
         # 初始化模型
+        lightgbm_c = get_lightgbm_c()
+        lightgbm_r = get_lightgbm_r()
+        xgboost_c = get_xgboost_c()
         rf = RF(trainX)
         # 训练模型
-        # lightgbmC.cv(trainX, trainY)
         lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
-        # xgboost_c.cv(trainX, trainY)
+        lightgbm_r.train(trainX.copy(), trainY, lightgbm_r_path)
         xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
-        # rf.cv(trainX, trainY)
         rf.train(trainX.copy(), trainY)
         # 预测的结果进行拼装，准备进行第二次训练
         predictLightgbmC = lightgbm_c.predict(
                 testX, load_model(lightgbm_c_path)
+                )
+        predictLightgbmR = lightgbm_r.predict(
+                testX, load_model(lightgbm_r_path)
                 )
         predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
         predictRf = rf.predict(testX)
@@ -158,6 +191,7 @@ if __name__ == '__main__':
                 np.array(
                     [
                         predictLightgbmC,
+                        predictLightgbmR,
                         predictXgboostC,
                         predictRf,
                         ]
@@ -173,21 +207,21 @@ if __name__ == '__main__':
     saveX = trainX.copy()
     saveX['orderType'] = trainY
     saveX.to_csv('./model/tmp_combine_train.csv', sep=',')
-    # 组合模型训练
-    param = {
-            'penalty': 'l2',
-            'tol': 0.00001,
-            'C': 0.1,
-            'class_weight': None,
-            'solver': 'liblinear',
-            'max_iter': 100,
-            'multi_class': 'ovr',
-            'n_jobs': 1,
-            'scoring': 'roc_auc',
-            'nfold': 10
-            }
-    lr = few_model.LR(param)
-    lr.cv(trainX, trainY)
-    lr.train(trainX, trainY, Config.MODEL_COMBINE)
+    # # 组合模型训练
+    # param = {
+    #         'penalty': 'l2',
+    #         'tol': 0.00001,
+    #         'C': 0.1,
+    #         'class_weight': None,
+    #         'solver': 'liblinear',
+    #         'max_iter': 100,
+    #         'multi_class': 'ovr',
+    #         'n_jobs': 1,
+    #         'scoring': 'roc_auc',
+    #         'nfold': 10
+    #         }
+    # lr = few_model.LR(param)
+    # lr.cv(trainX, trainY)
+    # lr.train(trainX, trainY, Config.MODEL_COMBINE)
     # # 进行合并结果的预测
     # predict_up(lr)
