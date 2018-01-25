@@ -6,7 +6,7 @@
 import pandas as pd
 
 
-COLUMN_PER = 0.9                   # 剔除的列含na量
+COLUMN_PER = 1                   # 剔除的列含na量
 ROW_PER = 0.9                      # 剔除的行含na量
 
 
@@ -28,12 +28,12 @@ def delete_na(inputData):
     # 列
     columnNaNum = inputData.isnull().sum()
     columnNaPer = columnNaNum/float(inputData.shape[0])
-    deleteCol = list(columnNaPer[columnNaPer > COLUMN_PER].index)
+    deleteCol = list(columnNaPer[columnNaPer >= COLUMN_PER].index)
     DELETE_DIC['column'] += deleteCol
     # 行
     rowNaNum = inputData.isnull().sum(axis=1)
     rowNaPer = rowNaNum/float(inputData.shape[1])
-    deleteRow = list(rowNaPer[rowNaPer > ROW_PER].index)
+    deleteRow = list(rowNaPer[rowNaPer >= ROW_PER].index)
     DELETE_DIC['row'] += deleteRow
     print(DELETE_DIC)
 

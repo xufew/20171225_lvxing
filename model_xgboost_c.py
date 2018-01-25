@@ -61,18 +61,19 @@ if __name__ == '__main__':
             'eta': 0.05,
             'naData': setNa,
             'scale_pos_weight': 1,
-            'max_depth': 8,
+            'max_depth': 6,
             'subsample': 0.5,
             'col_sample_bytree': 0.4,
-            'min_child_weight': 5,
+            'min_child_weight': 1,
+            'reg_lambda': 13.25,
             'num_roud': 1000,
             'objective': 'binary:logistic',
             }
     xgboost = few_model.Xgboost(inputParam)
-    # xgboost.cv(trainX, trainY)
+    xgboost.cv(trainX, trainY)
     # # 开始训练
     # xgboost.train(trainX, trainY, modelSavePath)
     # # 预测
     # predict(modelSavePath, xgboost)
-    # 进行最佳搜索
-    line_search(trainX, trainY)
+    # # 进行最佳搜索
+    # line_search(trainX, trainY)

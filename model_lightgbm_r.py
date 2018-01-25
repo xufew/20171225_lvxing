@@ -60,7 +60,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 50,
-            'num_trees': 300,
+            'num_trees': 420,
             'min_sum_hessian_in_leaf': 0.0575,
             'min_data_in_leaf': 50,
             'bagging_fraction': 0.3,

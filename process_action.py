@@ -314,7 +314,7 @@ if __name__ == '__main__':
         browseNum = 0
         rangeList = []
         for i in range(browseLen-1):
-            browseNum = 0
+            browseNum += 1
             rangeList.append(int(timeSort[i+1])-int(timeSort[i]))
         # 提取间隔相关信息
         if browseNum == 0:
@@ -472,8 +472,8 @@ if __name__ == '__main__':
                 str(browseLastFour),        # 倒数第四个间隔
                 lastTwoType,                # 倒数第二个类型
                 lastThreeType,              # 倒数第三个类型
-                threeAv,                    # 最后三个的均值
-                threeVar,                   # 最后三个的方差
+                str(threeAv),               # 最后三个的均值
+                str(threeVar),              # 最后三个的方差
                 str(type1Per),              # 类型1所占比例
                 str(type2Per),              # 类型2所占比例
                 str(type3Per),              # 类型3所占比例

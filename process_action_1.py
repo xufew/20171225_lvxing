@@ -158,6 +158,17 @@ def write_feature_name(fileWriter):
             'recentAv11',
             'recentmin10',
             'recentmin11',
+            'finalTypeDate1',
+            'finalTypeDate2',
+            'finalTypeDate3',
+            'finalTypeDate4',
+            'finalTypeDate5',
+            'finalTypeDate6',
+            'finalTypeDate7',
+            'finalTypeDate8',
+            'finalTypeDate9',
+            'finalTypeDate10',
+            'finalTypeDate11',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -305,6 +316,26 @@ def get_range(valueDic, timeSort):
     return recentDic
 
 
+def final_type_date():
+    '''
+    最终最近一次的，不同type的具体时间
+    '''
+    finalTypeDate = {
+            '1': '',
+            '2': '',
+            '3': '',
+            '4': '',
+            '5': '',
+            '6': '',
+            '7': '',
+            '8': '',
+            '9': '',
+            '10': '',
+            '11': '',
+            }
+    return finalTypeDate
+
+
 if __name__ == '__main__':
     actionPath = sys.argv[1]
     outPath = sys.argv[2]
@@ -348,12 +379,19 @@ if __name__ == '__main__':
         go9TimeList = []
         continueDic = continue_dic()
         typeDisDic = to_type_time()
+        finalTypeDate = final_type_date()
         for i, thisTime in enumerate(timeSort):
             thisType = valueDic[thisTime]
             con1 = thisType == '9'
             con2 = i == totalNum-1
             con3 = i < totalNum-1
             go9Dis += 1
+            # 统计每种type最后一次出现的时间
+            if len(finalTypeDate[thisType]) == 0:
+                finalTypeDate[thisType] = thisTime
+            else:
+                if int(thisTime) > int(finalTypeDate[thisType]):
+                    finalTypeDate[thisType] = thisTime
             if con3:
                 go9Time += int(timeSort[i+1])-int(timeSort[i])
             if con1 or con2:
@@ -516,6 +554,17 @@ if __name__ == '__main__':
                 str(recentAv11),
                 str(recentmin10),
                 str(recentmin11),
+                str(finalTypeDate['1']),
+                str(finalTypeDate['2']),
+                str(finalTypeDate['3']),
+                str(finalTypeDate['4']),
+                str(finalTypeDate['5']),
+                str(finalTypeDate['6']),
+                str(finalTypeDate['7']),
+                str(finalTypeDate['8']),
+                str(finalTypeDate['9']),
+                str(finalTypeDate['10']),
+                str(finalTypeDate['11']),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

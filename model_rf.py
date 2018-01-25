@@ -50,17 +50,18 @@ if __name__ == '__main__':
             lambda x: x.fillna(naProducer.produce(x, 1, 0))
             )
     param = {
-            'n_estimators': 300,
+            'n_estimators': 700,
             'criterion': 'gini',
             'max_features': 'auto',
             'max_depth': None,
-            'min_samples_split': 15,
-            'min_samples_leaf': 5,
+            'min_samples_split': 2,
+            'min_samples_leaf': 2,
             'min_weight_fraction_leaf': 0,
             'n_jobs': 4,
             'verbose': 1,
             }
     rf = few_model.RF(param)
-    rf.cv(trainX, trainY)
+    # rf.cv(trainX, trainY)
+    rf.line_search(trainX, trainY)
     # rf.train(trainX, trainY, modelPath)
     # predict(modelPath, rf, naProducer)

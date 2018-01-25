@@ -133,6 +133,9 @@ featureList = [
         'nearSuper_add_type6Per', 'simplePer_add_recentDis1',
         'simpleNum_add_recentmin9', 'lastType6_add_go9Time',
         'recentDis1_mul_continueMin6', 'recentDis1_mul_recent5',
+        'finalTypeDate1', 'finalTypeDate3', 'finalTypeDate4',
+        'finalTypeDate5', 'finalTypeDate6', 'finalTypeDate8',
+        'finalTypeDate9',
         ]
 
 
