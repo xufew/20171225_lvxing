@@ -550,8 +550,6 @@ if __name__ == '__main__':
                 con2 = toType == '11'
                 if con1 or con2:
                     startType = valueDic[timeSort[j]]
-                    con1 = startType != '8'
-                    con2 = startType != '9'
                     typeDis = int(timeSort[i])-int(timeSort[j])
                     typeToTypeDic[toType][startType]['num'] += 1
                     if typeToTypeDic[toType][startType]['max'] == '':

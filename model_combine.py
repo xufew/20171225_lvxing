@@ -116,6 +116,48 @@ class RF:
         return predictValue
 
 
+class ExtraTree:
+    def __init__(self, trainX):
+        param = {
+                'n_estimators': 700,
+                'criterion': 'gini',
+                'max_features': 'auto',
+                'max_depth': None,
+                'min_samples_split': 10,
+                'min_samples_leaf': 2,
+                'min_weight_fraction_leaf': 0,
+                'n_jobs': 4,
+                'verbose': 1,
+                }
+        self.model = few_model.ExtraTree(param)
+        self.naProducer = few_model.Preprocessor.NaProducer()
+        self.modelpath = './model/tmp_extratree.pkl'
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.produce(x, 1, 0))
+                )
+
+    def cv(self, trainX, trainY):
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        self.model.cv(trainX, trainY)
+
+    def train(self, trainX, trainY):
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        self.model.train(trainX, trainY, self.modelpath)
+
+    def predict(self, testX):
+        with open(self.modelpath, 'rb') as fileReader:
+            model = pickle.load(fileReader)
+        testX = testX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        predictValue = self.model.predict(model, testX)
+        return predictValue
+
+
 def predict_up(lr):
     # 进行结果拼接
     reLightgbmC = pd.read_table(Config.RESULT_LIGHTGBM_CL, sep=',')
@@ -157,7 +199,7 @@ def load_model(modelPath):
 if __name__ == '__main__':
     # 第一次获取
     trainData = pd.read_table(Config.TRAIN_DATA_PATH, sep=',', index_col=0)
-    kf = KFold(n_splits=10)
+    kf = KFold(n_splits=5)
     combineDic = {}
     for train_index, test_index in kf.split(trainData):
         # 获取每次的训练测试数据
@@ -172,11 +214,13 @@ if __name__ == '__main__':
         lightgbm_r = get_lightgbm_r()
         xgboost_c = get_xgboost_c()
         rf = RF(trainX)
+        extratree = ExtraTree(trainX)
         # 训练模型
         lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
         lightgbm_r.train(trainX.copy(), trainY, lightgbm_r_path)
         xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
         rf.train(trainX.copy(), trainY)
+        extratree.train(trainX.copy(), trainY)
         # 预测的结果进行拼装，准备进行第二次训练
         predictLightgbmC = lightgbm_c.predict(
                 testX, load_model(lightgbm_c_path)
@@ -186,6 +230,7 @@ if __name__ == '__main__':
                 )
         predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
         predictRf = rf.predict(testX)
+        predictExtratree = extratree.predict(testX)
         # 进行拼装
         testTrain = pd.DataFrame(
                 np.array(
@@ -194,6 +239,7 @@ if __name__ == '__main__':
                         predictLightgbmR,
                         predictXgboostC,
                         predictRf,
+                        predictExtratree,
                         ]
                     ).T,
                 index=list(testX.index)
@@ -207,7 +253,10 @@ if __name__ == '__main__':
     saveX = trainX.copy()
     saveX['orderType'] = trainY
     saveX.to_csv('./model/tmp_combine_train.csv', sep=',')
-    # # 组合模型训练
+    # 组合模型训练
+    trainData = pd.read_table('./model/tmp_combine_train.csv', sep=',', index_col=0)
+    trainX = trainData.drop(['orderType'], axis=1)
+    trainY = trainData['orderType']
     # param = {
     #         'penalty': 'l2',
     #         'tol': 0.00001,
@@ -223,5 +272,20 @@ if __name__ == '__main__':
     # lr = few_model.LR(param)
     # lr.cv(trainX, trainY)
     # lr.train(trainX, trainY, Config.MODEL_COMBINE)
+    params = {
+            'learning_rate': 0.001,
+            'num_leaves': 3,
+            'num_trees': 20000,
+            # 'min_sum_hessian_in_leaf': 0.2,
+            # 'min_data_in_leaf': 1,
+            # 'bagging_fraction': 0.5,
+            'lambda_l1': 0,
+            'lambda_l2': 0,
+            'num_threads': 4,
+            'scale_pos_weight': 1,
+            'application': 'binary',
+            }
+    lightgbm = few_model.Lightgbm(params)
+    evalDic = lightgbm.cv(trainX, trainY)
     # # 进行合并结果的预测
     # predict_up(lr)

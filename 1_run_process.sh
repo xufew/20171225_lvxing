@@ -26,8 +26,8 @@ OUT_LABEL_TRAIN='./data/train_use/label_train.csv'
 # python3 process_action.py $ACTION_TRAIN $OUT_ACTION || exit 1
 # # 处理浏览信息增加
 # python3 process_action_1.py $OUT_ACTION_WITH_HISTORY $OUT_ACTION_1 || exit 1
-# 进行训练集维度的合并
-python3 process_combine.py $OUT_USER_PROFILE_TRAIN $OUT_ORDER_HISTORY_TRAIN $OUT_USER_COMMENT_TRAIN $LABEL_TRAIN $OUT_ACTION $OUT_ACTION_1 $OUT_LABEL_TRAIN || exit 1
+# # 进行训练集维度的合并
+# python3 process_combine.py $OUT_USER_PROFILE_TRAIN $OUT_ORDER_HISTORY_TRAIN $OUT_USER_COMMENT_TRAIN $LABEL_TRAIN $OUT_ACTION $OUT_ACTION_1 $OUT_LABEL_TRAIN || exit 1
 
 # 输入路径
 USER_PROFILE_TRAIN='./data/test/userProfile_test.csv'
