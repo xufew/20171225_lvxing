@@ -280,103 +280,89 @@ def load_model(modelPath):
 
 
 if __name__ == '__main__':
-    # 第一次获取
-    trainData = pd.read_table(Config.TRAIN_DATA_PATH, sep=',', index_col=0)
-    kf = KFold(n_splits=5)
-    combineDic = {}
-    for train_index, test_index in kf.split(trainData):
-        # 获取每次的训练测试数据
-        train = trainData.iloc[train_index, :].copy()
-        test = trainData.iloc[test_index, :].copy()
-        trainX = train.drop(['orderType'], axis=1)
-        trainY = train['orderType']
-        testX = test.drop(['orderType'], axis=1)
-        testY = test['orderType']
-        # 初始化模型
-        lightgbm_c = get_lightgbm_c()
-        lightgbm_r = get_lightgbm_r()
-        xgboost_c = get_xgboost_c()
-        rf = RF(trainX)
-        extratree = ExtraTree(trainX)
-        adaboost = AdaBoost(trainX)
-        gbdt = GBDT(trainX)
-        # 训练模型
-        lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
-        lightgbm_r.train(trainX.copy(), trainY, lightgbm_r_path)
-        xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
-        rf.train(trainX.copy(), trainY)
-        extratree.train(trainX.copy(), trainY)
-        adaboost.train(trainX.copy(), trainY)
-        gbdt.train(trainX.copy(), trainY)
-        # 预测的结果进行拼装，准备进行第二次训练
-        predictLightgbmC = lightgbm_c.predict(
-                testX, load_model(lightgbm_c_path)
-                )
-        predictLightgbmR = lightgbm_r.predict(
-                testX, load_model(lightgbm_r_path)
-                )
-        predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
-        predictRf = rf.predict(testX)
-        predictExtratree = extratree.predict(testX)
-        predictAdaboost = adaboost.predict(testX)
-        predictGbdt = gbdt.predict(testX)
-        # 进行拼装
-        testTrain = pd.DataFrame(
-                np.array(
-                    [
-                        predictLightgbmC,
-                        predictLightgbmR,
-                        predictXgboostC,
-                        predictRf,
-                        predictExtratree,
-                        predictAdaboost,
-                        predictGbdt,
-                        ]
-                    ).T,
-                index=list(testX.index)
-                )
-        if len(combineDic) == 0:
-            combineDic = testTrain
-        else:
-            combineDic = pd.concat([combineDic, testTrain])
-    trainX = combineDic.loc[trainData.index, :]
-    trainY = trainData['orderType']
-    saveX = trainX.copy()
-    saveX['orderType'] = trainY
-    saveX.to_csv('./model/tmp_combine_train.csv', sep=',')
-    # # 组合模型训练
-    # trainData = pd.read_table('./model/tmp_combine_train.csv', sep=',', index_col=0)
-    # trainX = trainData.drop(['orderType'], axis=1)
+    # # 第一次获取
+    # trainData = pd.read_table(Config.TRAIN_DATA_PATH, sep=',', index_col=0)
+    # kf = KFold(n_splits=5)
+    # combineDic = {}
+    # for train_index, test_index in kf.split(trainData):
+    #     # 获取每次的训练测试数据
+    #     train = trainData.iloc[train_index, :].copy()
+    #     test = trainData.iloc[test_index, :].copy()
+    #     trainX = train.drop(['orderType'], axis=1)
+    #     trainY = train['orderType']
+    #     testX = test.drop(['orderType'], axis=1)
+    #     testY = test['orderType']
+    #     # 初始化模型
+    #     lightgbm_c = get_lightgbm_c()
+    #     lightgbm_r = get_lightgbm_r()
+    #     xgboost_c = get_xgboost_c()
+    #     rf = RF(trainX)
+    #     extratree = ExtraTree(trainX)
+    #     adaboost = AdaBoost(trainX)
+    #     gbdt = GBDT(trainX)
+    #     # 训练模型
+    #     lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
+    #     lightgbm_r.train(trainX.copy(), trainY, lightgbm_r_path)
+    #     xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
+    #     rf.train(trainX.copy(), trainY)
+    #     extratree.train(trainX.copy(), trainY)
+    #     adaboost.train(trainX.copy(), trainY)
+    #     gbdt.train(trainX.copy(), trainY)
+    #     # 预测的结果进行拼装，准备进行第二次训练
+    #     predictLightgbmC = lightgbm_c.predict(
+    #             testX, load_model(lightgbm_c_path)
+    #             )
+    #     predictLightgbmR = lightgbm_r.predict(
+    #             testX, load_model(lightgbm_r_path)
+    #             )
+    #     predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
+    #     predictRf = rf.predict(testX)
+    #     predictExtratree = extratree.predict(testX)
+    #     predictAdaboost = adaboost.predict(testX)
+    #     predictGbdt = gbdt.predict(testX)
+    #     # 进行拼装
+    #     testTrain = pd.DataFrame(
+    #             np.array(
+    #                 [
+    #                     predictLightgbmC,
+    #                     predictLightgbmR,
+    #                     predictXgboostC,
+    #                     predictRf,
+    #                     predictExtratree,
+    #                     predictAdaboost,
+    #                     predictGbdt,
+    #                     ]
+    #                 ).T,
+    #             index=list(testX.index)
+    #             )
+    #     if len(combineDic) == 0:
+    #         combineDic = testTrain
+    #     else:
+    #         combineDic = pd.concat([combineDic, testTrain])
+    # trainX = combineDic.loc[trainData.index, :]
     # trainY = trainData['orderType']
-    # # param = {
-    # #         'penalty': 'l2',
-    # #         'tol': 0.00001,
-    # #         'C': 0.1,
-    # #         'class_weight': None,
-    # #         'solver': 'liblinear',
-    # #         'max_iter': 100,
-    # #         'multi_class': 'ovr',
-    # #         'n_jobs': 1,
-    # #         'scoring': 'roc_auc',
-    # #         'nfold': 10
-    # #         }
-    # # lr = few_model.LR(param)
-    # # lr.cv(trainX, trainY)
-    # # lr.train(trainX, trainY, Config.MODEL_COMBINE)
-    # params = {
-    #         'learning_rate': 0.001,
-    #         'num_leaves': 3,
-    #         'num_trees': 20000,
-    #         # 'min_sum_hessian_in_leaf': 0.2,
-    #         # 'min_data_in_leaf': 1,
-    #         # 'bagging_fraction': 0.5,
-    #         'lambda_l1': 0,
-    #         'lambda_l2': 0,
-    #         'num_threads': 4,
-    #         'scale_pos_weight': 1,
-    #         'application': 'binary',
-    #         }
-    # lightgbm = few_model.Lightgbm(params)
-    # evalDic = lightgbm.cv(trainX, trainY)
+    # saveX = trainX.copy()
+    # saveX['orderType'] = trainY
+    # saveX.to_csv('./model/tmp_combine_train.csv', sep=',')
+    # 组合模型训练
+    trainData = pd.read_table('./model/tmp_combine_train.csv', sep=',', index_col=0)
+    trainX = trainData.drop(['orderType'], axis=1)
+    trainX = trainX.drop(['4'], axis=1)
+    trainY = trainData['orderType']
+    param = {
+            'penalty': 'l2',
+            'tol': 0.00001,
+            'C': 0.001,
+            'class_weight': None,
+            'solver': 'liblinear',
+            'max_iter': 100,
+            'multi_class': 'ovr',
+            'n_jobs': 1,
+            'scoring': 'roc_auc',
+            'nfold': 10,
+            'verbose': 1,
+            }
+    lr = few_model.LR(param)
+    lr.cv(trainX, trainY)
     # # 进行合并结果的预测
     # predict_up(lr)
