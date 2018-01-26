@@ -50,7 +50,7 @@ if __name__ == '__main__':
             lambda x: x.fillna(naProducer.produce(x, 1, 0))
             )
     param = {
-            'n_estimators': 700,
+            'n_estimators': 1000,
             'criterion': 'gini',
             'max_features': 'auto',
             'max_depth': None,

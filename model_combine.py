@@ -77,7 +77,7 @@ def get_xgboost_c():
 class RF:
     def __init__(self, trainX):
         param = {
-                'n_estimators': 700,
+                'n_estimators': 1000,
                 'criterion': 'gini',
                 'max_features': 'auto',
                 'max_depth': None,
@@ -90,6 +90,50 @@ class RF:
         self.model = few_model.RF(param)
         self.naProducer = few_model.Preprocessor.NaProducer()
         self.modelpath = './model/tmp_rf.pkl'
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.produce(x, 1, 0))
+                )
+
+    def cv(self, trainX, trainY):
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        self.model.cv(trainX, trainY)
+
+    def train(self, trainX, trainY):
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        self.model.train(trainX, trainY, self.modelpath)
+
+    def predict(self, testX):
+        with open(self.modelpath, 'rb') as fileReader:
+            model = pickle.load(fileReader)
+        testX = testX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        predictValue = self.model.predict(model, testX)
+        return predictValue
+
+
+class GBDT:
+    def __init__(self, trainX):
+        param = {
+                'n_estimators': 300,
+                'learning_rate': 0.1,
+                'subsample': 0.8,
+                'max_features': 0.4,
+                'min_samples_split': 20,
+                'min_samples_leaf': 5,
+                'max_depth': 5,
+                'n_jobs_cv': 1,
+                'verbose': 1,
+                'nfold': 5,
+                'scoring': 'roc_auc',
+                }
+        self.model = few_model.GBDT(param)
+        self.naProducer = few_model.Preprocessor.NaProducer()
+        self.modelpath = './model/tmp_gbdt.pkl'
         trainX = trainX.apply(
                 lambda x: x.fillna(self.naProducer.produce(x, 1, 0))
                 )
@@ -132,6 +176,45 @@ class ExtraTree:
         self.model = few_model.ExtraTree(param)
         self.naProducer = few_model.Preprocessor.NaProducer()
         self.modelpath = './model/tmp_extratree.pkl'
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.produce(x, 1, 0))
+                )
+
+    def cv(self, trainX, trainY):
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        self.model.cv(trainX, trainY)
+
+    def train(self, trainX, trainY):
+        trainX = trainX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        self.model.train(trainX, trainY, self.modelpath)
+
+    def predict(self, testX):
+        with open(self.modelpath, 'rb') as fileReader:
+            model = pickle.load(fileReader)
+        testX = testX.apply(
+                lambda x: x.fillna(self.naProducer.get())
+                )
+        predictValue = self.model.predict(model, testX)
+        return predictValue
+
+
+class AdaBoost:
+    def __init__(self, trainX):
+        param = {
+                'n_estimators': 230,
+                'learning_rate': 0.5,
+                'algorithm': 'SAMME.R',
+                'n_jobs_cv': 1,
+                'nfold': 5,
+                'scoring': 'roc_auc',
+                }
+        self.model = few_model.AdaBoost(param)
+        self.naProducer = few_model.Preprocessor.NaProducer()
+        self.modelpath = './model/tmp_adaboost.pkl'
         trainX = trainX.apply(
                 lambda x: x.fillna(self.naProducer.produce(x, 1, 0))
                 )
@@ -215,12 +298,16 @@ if __name__ == '__main__':
         xgboost_c = get_xgboost_c()
         rf = RF(trainX)
         extratree = ExtraTree(trainX)
+        adaboost = AdaBoost(trainX)
+        gbdt = GBDT(trainX)
         # 训练模型
         lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
         lightgbm_r.train(trainX.copy(), trainY, lightgbm_r_path)
         xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
         rf.train(trainX.copy(), trainY)
         extratree.train(trainX.copy(), trainY)
+        adaboost.train(trainX.copy(), trainY)
+        gbdt.train(trainX.copy(), trainY)
         # 预测的结果进行拼装，准备进行第二次训练
         predictLightgbmC = lightgbm_c.predict(
                 testX, load_model(lightgbm_c_path)
@@ -231,6 +318,8 @@ if __name__ == '__main__':
         predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
         predictRf = rf.predict(testX)
         predictExtratree = extratree.predict(testX)
+        predictAdaboost = adaboost.predict(testX)
+        predictGbdt = gbdt.predict(testX)
         # 进行拼装
         testTrain = pd.DataFrame(
                 np.array(
@@ -240,6 +329,8 @@ if __name__ == '__main__':
                         predictXgboostC,
                         predictRf,
                         predictExtratree,
+                        predictAdaboost,
+                        predictGbdt,
                         ]
                     ).T,
                 index=list(testX.index)
@@ -253,39 +344,39 @@ if __name__ == '__main__':
     saveX = trainX.copy()
     saveX['orderType'] = trainY
     saveX.to_csv('./model/tmp_combine_train.csv', sep=',')
-    # 组合模型训练
-    trainData = pd.read_table('./model/tmp_combine_train.csv', sep=',', index_col=0)
-    trainX = trainData.drop(['orderType'], axis=1)
-    trainY = trainData['orderType']
-    # param = {
-    #         'penalty': 'l2',
-    #         'tol': 0.00001,
-    #         'C': 0.1,
-    #         'class_weight': None,
-    #         'solver': 'liblinear',
-    #         'max_iter': 100,
-    #         'multi_class': 'ovr',
-    #         'n_jobs': 1,
-    #         'scoring': 'roc_auc',
-    #         'nfold': 10
+    # # 组合模型训练
+    # trainData = pd.read_table('./model/tmp_combine_train.csv', sep=',', index_col=0)
+    # trainX = trainData.drop(['orderType'], axis=1)
+    # trainY = trainData['orderType']
+    # # param = {
+    # #         'penalty': 'l2',
+    # #         'tol': 0.00001,
+    # #         'C': 0.1,
+    # #         'class_weight': None,
+    # #         'solver': 'liblinear',
+    # #         'max_iter': 100,
+    # #         'multi_class': 'ovr',
+    # #         'n_jobs': 1,
+    # #         'scoring': 'roc_auc',
+    # #         'nfold': 10
+    # #         }
+    # # lr = few_model.LR(param)
+    # # lr.cv(trainX, trainY)
+    # # lr.train(trainX, trainY, Config.MODEL_COMBINE)
+    # params = {
+    #         'learning_rate': 0.001,
+    #         'num_leaves': 3,
+    #         'num_trees': 20000,
+    #         # 'min_sum_hessian_in_leaf': 0.2,
+    #         # 'min_data_in_leaf': 1,
+    #         # 'bagging_fraction': 0.5,
+    #         'lambda_l1': 0,
+    #         'lambda_l2': 0,
+    #         'num_threads': 4,
+    #         'scale_pos_weight': 1,
+    #         'application': 'binary',
     #         }
-    # lr = few_model.LR(param)
-    # lr.cv(trainX, trainY)
-    # lr.train(trainX, trainY, Config.MODEL_COMBINE)
-    params = {
-            'learning_rate': 0.001,
-            'num_leaves': 3,
-            'num_trees': 20000,
-            # 'min_sum_hessian_in_leaf': 0.2,
-            # 'min_data_in_leaf': 1,
-            # 'bagging_fraction': 0.5,
-            'lambda_l1': 0,
-            'lambda_l2': 0,
-            'num_threads': 4,
-            'scale_pos_weight': 1,
-            'application': 'binary',
-            }
-    lightgbm = few_model.Lightgbm(params)
-    evalDic = lightgbm.cv(trainX, trainY)
+    # lightgbm = few_model.Lightgbm(params)
+    # evalDic = lightgbm.cv(trainX, trainY)
     # # 进行合并结果的预测
     # predict_up(lr)
