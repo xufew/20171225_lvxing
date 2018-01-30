@@ -70,9 +70,9 @@ def process_list(stringList, provinceValue):
     ageList = few_model.Preprocessor.one_hot(ageDic, age)
     outString = '{},{},{},{},{}'.format(
             userId,
-            ','.join(list(map(lambda x: str(x), genderList))),
-            ','.join(list(map(lambda x: str(x), provinceList))),
-            ','.join(list(map(lambda x: str(x), ageList))),
+            genderList,
+            provinceList,
+            ageList,
             ','.join(provinceValue[province]),
             )
     return outString
@@ -123,10 +123,10 @@ if __name__ == '__main__':
                 if count == 1:
                     outString = '{},{},{},{},{}'.format(
                             'userid',
-                            ','.join(get_hot_name(genderDic)),
-                            ','.join(get_hot_name(provinceDic)),
-                            ','.join(get_hot_name(ageDic)),
-                            ','.join(provinceName),
+                            get_hot_name(genderDic),
+                            get_hot_name(provinceDic),
+                            get_hot_name(ageDic),
+                            provinceName,
                             )
                 else:
                     outString = process_list(stringList, provinceValue)

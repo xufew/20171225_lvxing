@@ -120,18 +120,12 @@ def get_range(valueDic, timeSort):
 
 
 def trans_type_to_string(processDic, tranType):
-    transList = map(
-            lambda x: str(x),
-            few_model.Preprocessor.one_hot(processDic, tranType)
-            )
-    transString = ','.join(transList)
+    transString = few_model.Preprocessor.one_hot(processDic, tranType)
     return transString
 
 
 def get_hot_name(processDic, addName=''):
-    transName = ','.join(
-            few_model.Preprocessor.get_one_hot_name(typeDic, addName)
-            )
+    transName = few_model.Preprocessor.get_one_hot_name(typeDic, addName)
     return transName
 
 

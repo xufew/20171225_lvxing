@@ -6,6 +6,7 @@
 import sys
 
 import numpy as np
+import tushare as ts
 
 import few_base
 
@@ -201,6 +202,8 @@ def write_feature_name(fileWriter):
             'lastDayActionNum10',
             'lastDayActionNum11',
             'lastDayActionNum12',
+            'gupiaoOpen',
+            'gupiaoChange',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -413,6 +416,7 @@ if __name__ == '__main__':
     outPath = sys.argv[2]
     fileWriter = open(outPath, 'wb')
     timer = few_base.Timer()
+    allgupiao = ts.get_hist_data('sh', end='2018-01-10')
     # 读取全部信息
     userDic = read_userDic(actionPath)
     # 写feature名
@@ -591,6 +595,16 @@ if __name__ == '__main__':
         else:
             finalThirdDate = ''
         finalDate = timeSort[-1]
+        checkDate = finalDate
+        while True:
+            checkDate = int(checkDate)-86400
+            finalDateString = timer.trans_unix_to_string(checkDate, '%Y-%m-%d')
+            try:
+                gupiaoOpen = allgupiao.loc[finalDateString, 'open']
+                gupiaoChange = allgupiao.loc[finalDateString, 'price_change']
+                break
+            except Exception:
+                pass
         # 储存
         outList = [
                 userId,
@@ -711,6 +725,8 @@ if __name__ == '__main__':
                 str(lastDayActionNum['10']),
                 str(lastDayActionNum['11']),
                 str(lastDayActionNum['12']),
+                str(gupiaoOpen),
+                str(gupiaoChange),
                 ]
 
         fileWriter.write(

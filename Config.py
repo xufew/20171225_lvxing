@@ -5,6 +5,34 @@
 # ============
 
 
+# #############################
+# 提取样本
+# #############################
+USER_PROFILE_TRAIN = './data/train/userProfile_train.csv'
+ORDER_HISTORY_TRAIN = './data/train/orderHistory_train.csv'
+USER_COMMENT_TRAIN = './data/train/userComment_train.csv'
+ACTION_TRAIN = './data/train/action_train.csv'
+LABEL_TRAIN = './data/train/orderFuture_train.csv'
+USER_PROFILE_TEST = './data/test/userProfile_test.csv'
+ORDER_HISTORY_TEST = './data/test/orderHistory_test.csv'
+USER_COMMENT_TEST = './data/test/userComment_test.csv'
+ACTION_TEST = './data/test/action_test.csv'
+
+SAMPLE_USER_PROFILE = './data/train/userProfile_add.csv'
+SAMPLE_ORDER_HISTORY = './data/train/orderHistory_add.csv'
+SAMPLE_USER_COMMENT = './data/train/userComment_add.csv'
+SAMPLE_ACTION = './data/train/action_add.csv'
+SAMPLE_LABEL = './data/train/orderFuture_add.csv'
+
+ALL_USER_PROFILE = './data/train/userProfile_all.csv'
+ALL_ORDER_HISTORY = './data/train/orderHistory_all.csv'
+ALL_USER_COMMENT = './data/train/userComment_all.csv'
+ALL_ACTION = './data/train/action_all.csv'
+ALL_LABEL = './data/train/orderFuture_all.csv'
+
+# #############################
+# 训练相关
+# #############################
 TRAIN_DATA_PATH = './data/train_use/label_train.csv'
 TEST_DATA_PATH = './data/test_use/label_test.csv'
 

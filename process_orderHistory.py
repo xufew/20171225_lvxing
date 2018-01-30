@@ -123,14 +123,14 @@ if __name__ == '__main__':
         if count == 1:
             nameList = [
                     'userid',
-                    'orderNum',
-                    'superNum',
-                    'superPer',
-                    'nearSuper',
+                    # 'orderNum',
+                    # 'superNum',
+                    # 'superPer',
+                    # 'nearSuper',
                     'simpleNum',
-                    'simplePer',
-                    'cityPer',
-                    'countryPer',
+                    # 'simplePer',
+                    # 'cityPer',
+                    # 'countryPer',
                     'continentPer',
                     few_model.Preprocessor.get_one_hot_name(
                         cityKey, 'finalGoCity_'
@@ -166,14 +166,14 @@ if __name__ == '__main__':
                 )
         outList = [
                 userId,
-                str(orderNum),
-                str(superNum),
-                str(superPer),
-                str(nearSuper),
+                # str(orderNum),
+                # str(superNum),
+                # str(superPer),
+                # str(nearSuper),
                 str(simpleNum),
-                str(simpleNum/float(orderNum)),
-                str(infoDic['cityPer']),
-                str(infoDic['countryPer']),
+                # str(simpleNum/float(orderNum)),
+                # str(infoDic['cityPer']),
+                # str(infoDic['countryPer']),
                 str(infoDic['continentPer']),
                 str(finalGoCity),
                 str(finalGoCountry),

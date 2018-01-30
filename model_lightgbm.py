@@ -38,12 +38,13 @@ def predict(modelPath):
 def line_search(trainX, trainY):
     searchDic = {
             'learning_rate': [0.05],
-            'num_leaves': list(range(30, 100, 10)),
-            'bagging_fraction': [0.3],
-            'feature_fraction': [0.5],
+            'num_leaves': list(range(100, 30, -10)),
+            'bagging_fraction': [0.8],
+            'feature_fraction': [0.4],
+            'bagging_freq': [1],
             'lambda_l2': np.linspace(1, 50, 10),
             'min_data_in_leaf': list(range(50, 150, 20)),
-            'min_sum_hessian_in_leaf': np.linspace(0.01, 0.2, 5),
+            'min_sum_hessian_in_leaf': np.linspace(0.01, 5, 5),
             'num_trees': [1000],
             'application': ['binary'],
             }
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 60,
-            'num_trees': 470,
+            'num_trees': 650,
             'min_sum_hessian_in_leaf': 0.2,
             'min_data_in_leaf': 70,
             'bagging_fraction': 0.5,
@@ -72,17 +73,17 @@ if __name__ == '__main__':
             'application': 'binary',
             }
     lightgbm = few_model.Lightgbm(params)
-    # # 交叉验证
-    # evalDic = lightgbm.cv(trainX, trainY)
-    # 开始训练
-    trainModel = lightgbm.train(trainX, trainY, modelPath)
-    with open('./tmp_feature_im', 'wb') as fileWriter:
-        for thisIndex in trainModel.featureIm.index:
-            value = trainModel.featureIm[thisIndex]
-            fileWriter.write(
-                    '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
-                    )
-    # 预测
-    predict(modelPath)
+    # 交叉验证
+    evalDic = lightgbm.cv(trainX, trainY)
+    # # 开始训练
+    # trainModel = lightgbm.train(trainX, trainY, modelPath)
+    # with open('./tmp_feature_im', 'wb') as fileWriter:
+    #     for thisIndex in trainModel.featureIm.index:
+    #         value = trainModel.featureIm[thisIndex]
+    #         fileWriter.write(
+    #                 '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
+    #                 )
+    # # 预测
+    # predict(modelPath)
     # # 寻找最优变量
     # line_search(trainX, trainY)
