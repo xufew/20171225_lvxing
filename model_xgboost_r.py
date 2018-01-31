@@ -66,14 +66,14 @@ if __name__ == '__main__':
             'col_sample_bytree': 0.4,
             'min_child_weight': 11,
             'reg_lambda': 50,
-            'num_roud': 1000,
+            'num_roud': 600,
             'objective': 'reg:linear',
             }
     xgboost = few_model.Xgboost(inputParam)
     # xgboost.cv(trainX, trainY)
-    # # 开始训练
-    # xgboost.train(trainX, trainY, modelSavePath)
-    # # 预测
-    # predict(modelSavePath, xgboost)
+    # 开始训练
+    xgboost.train(trainX, trainY, modelSavePath)
+    # 预测
+    predict(modelSavePath, xgboost)
     # 进行最佳搜索
-    line_search(trainX, trainY)
+    # line_search(trainX, trainY)

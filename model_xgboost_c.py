@@ -66,7 +66,7 @@ if __name__ == '__main__':
             'col_sample_bytree': 0.4,
             'min_child_weight': 1,
             'reg_lambda': 13.25,
-            'num_roud': 700,
+            'num_roud': 800,
             'objective': 'binary:logistic',
             }
     xgboost = few_model.Xgboost(inputParam)
