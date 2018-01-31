@@ -330,17 +330,21 @@ if __name__ == '__main__':
         gbdt.train(trainX.copy(), trainY)
         # 预测的结果进行拼装，准备进行第二次训练
         predictLightgbmC = lightgbm_c.predict(
-                testX, load_model(lightgbm_c_path)
+                testX.copy(), load_model(lightgbm_c_path)
                 )
         predictLightgbmR = lightgbm_r.predict(
-                testX, load_model(lightgbm_r_path)
+                testX.copy(), load_model(lightgbm_r_path)
                 )
-        predictXgboostC = xgboost_c.predict(testX, load_model(xgboost_c_path))
-        predictXgboostR = xgboost_r.predict(testX, load_model(xgboost_r_path))
-        predictRf = rf.predict(testX)
-        predictExtratree = extratree.predict(testX)
-        predictAdaboost = adaboost.predict(testX)
-        predictGbdt = gbdt.predict(testX)
+        predictXgboostC = xgboost_c.predict(
+                testX.copy(), load_model(xgboost_c_path)
+                )
+        predictXgboostR = xgboost_r.predict(
+                testX.copy(), load_model(xgboost_r_path)
+                )
+        predictRf = rf.predict(testX.copy())
+        predictExtratree = extratree.predict(testX.copy())
+        predictAdaboost = adaboost.predict(testX.copy())
+        predictGbdt = gbdt.predict(testX.copy())
         # 进行拼装
         testTrain = pd.DataFrame(
                 np.array(
