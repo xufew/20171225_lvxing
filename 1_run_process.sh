@@ -45,6 +45,7 @@ OUT_ORDER_HISTORY_TRAIN='./data/test_use/orderHistory_test.csv'
 OUT_USER_COMMENT_TRAIN='./data/test_use/userComment_test.csv'
 OUT_ACTION='./data/test_use/action_test.csv'
 OUT_ACTION_1='./data/test_use/action_test_1.csv'
+OUT_ACTION_2='./data/test_use/action_train_2.csv'
 OUT_LABEL_TRAIN='./data/test_use/label_test.csv'
 
 # # 处理用户个人信息
