@@ -3,21 +3,22 @@
 # author: LONGFEI XU
 # Try your best
 # ============
+import pickle
 import sys
+from copy import deepcopy
 
 
-def write_feature_name(fileWriter):
+def write_feature_name(fileWriter, pathCountDic, pathCountName):
+    pathString = ''
+    for thisPath in pathCountName:
+        pathString += '{},'.format(thisPath+'countNum')
+        pathString += '{},'.format(thisPath+'startTime')
+        pathString += '{},'.format(thisPath+'endTime')
+        pathString += '{},'.format(thisPath+'range')
+    pathString = pathString[:-1]
     featureList = [
             'userid',
-            '1in',
-            '2in',
-            '3in',
-            '4in',
-            '5in',
-            '6in',
-            '7in',
-            '8in',
-            '9in',
+            pathString,
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -57,8 +58,22 @@ if __name__ == '__main__':
     actionPath = sys.argv[1]
     outPath = sys.argv[2]
     fileWriter = open(outPath, 'wb')
-    write_feature_name(fileWriter)
+    # 统计路径
     userDic = read_userDic(actionPath)
+    # 读取需要统计的path路径
+    pathCountList = pickle.load(open('./count_path.pkl', 'rb'))
+    pathCountDic = {}
+    for thisPath in pathCountList:
+        pathCountDic[thisPath] = {
+                'startTime': '',
+                'endTime': '',
+                'countNum': 0,
+                'range': '',
+                }
+    pathCountName = pathCountDic.keys()
+    # 写列名
+    write_feature_name(fileWriter, pathCountDic, pathCountName)
+    # 开始进行统计
     count = 0
     for userId in userDic:
         count += 1
@@ -67,17 +82,33 @@ if __name__ == '__main__':
         valueDic = userDic[userId]
         timeSort = sorted(valueDic)
         valueList = list(map(lambda x, y=valueDic: valueDic[x], timeSort))
+        userPathCount = deepcopy(pathCountDic)
+        # 开始进行路径开始结束时间，和路径结束时间，次数统计
+        for i in range(len(timeSort)-1):
+            pathString = '{}'.format(valueList[i])
+            startDate = timeSort[i]
+            for j in range(i+1, len(timeSort)):
+                if j-i > 8:
+                    break
+                pathString += '->{}'.format(valueList[j])
+                endDate = timeSort[j]
+                if pathString in userPathCount:
+                    userPathCount[pathString]['countNum'] += 1
+                    userPathCount[pathString]['startTime'] = startDate
+                    userPathCount[pathString]['endTime'] = endDate
+                    userPathCount[pathString]['range'] = \
+                        int(endDate)-int(startDate)
+        pathString = ''
+        for thisPath in pathCountName:
+            pathString += '{},'.format(userPathCount[thisPath]['countNum'])
+            pathString += '{},'.format(userPathCount[thisPath]['startTime'])
+            pathString += '{},'.format(userPathCount[thisPath]['endTime'])
+            pathString += '{},'.format(userPathCount[thisPath]['range'])
+        pathString = pathString[:-1]
+        # 进行结果综合
         outList = [
                 userId,
-                str(if_in('1', valueList)),
-                str(if_in('2', valueList)),
-                str(if_in('3', valueList)),
-                str(if_in('4', valueList)),
-                str(if_in('5', valueList)),
-                str(if_in('6', valueList)),
-                str(if_in('7', valueList)),
-                str(if_in('8', valueList)),
-                str(if_in('9', valueList)),
+                pathString
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

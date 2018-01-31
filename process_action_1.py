@@ -4,74 +4,12 @@
 # Try your best
 # ============
 import sys
+import datetime
 
 import numpy as np
 import tushare as ts
 
 import few_base
-
-
-def if_second_in(typeNum, valueDic, valueName):
-    if typeNum in valueDic:
-        outValue = valueDic[typeNum][valueName]
-    else:
-        outValue = ''
-    return outValue
-
-
-def if_value_in(typeNum, valueDic):
-    if typeNum in valueDic:
-        outValue = valueDic[typeNum]
-    else:
-        outValue = 0
-    return outValue
-
-
-def if_value_dic(typeNum, valueDic):
-    if typeNum in valueDic:
-        outValue = valueDic[typeNum]
-    else:
-        outValue = ''
-    return outValue
-
-
-def get_recent_dis(valueDic, timeSort):
-    '''
-    离最近的操作距离
-    '''
-    recentDic = {}
-    nowIndex = timeSort.index(timeSort[-1])
-    for thisTime in timeSort:
-        thisType = valueDic[thisTime]
-        thisDis = nowIndex-timeSort.index(thisTime)
-        if thisType not in recentDic:
-            recentDic[thisType] = thisDis
-        else:
-            if recentDic[thisType] > thisDis:
-                recentDic[thisType] = thisDis
-    return recentDic
-
-
-def read_userDic(actionPath):
-    with open(actionPath, 'rb') as fileReader:
-        count = 0
-        userDic = {}
-        while True:
-            stringLine = fileReader.readline()
-            if stringLine:
-                count += 1
-                if count == 1:
-                    continue
-                stringList = stringLine.strip().decode('utf8').split(',')
-                userId = stringList[0]
-                actionType = stringList[1]
-                actionTime = stringList[2]
-                if userId not in userDic:
-                    userDic[userId] = {}
-                userDic[userId][actionTime] = actionType
-            else:
-                break
-    return userDic
 
 
 def write_feature_name(fileWriter):
@@ -83,6 +21,27 @@ def write_feature_name(fileWriter):
             for k in ['min', 'max']:
                 typeToTypeName += '{}To{}Time{},'.format(j, i, k)
     typeToTypeName = typeToTypeName[:-1]
+    #
+    firstTypeDateString = ''
+    for i in range(1, 13, 1):
+        i = str(i)
+        for thisDetail in [
+                'finalYear', 'finalmonth', 'finalHour', 'finalDate'
+                ]:
+            firstTypeDateString += '{}_{},'.format(
+                    thisDetail, i
+                    )
+    firstTypeDateString = firstTypeDateString[:-1]
+    finalTypeDateString = ''
+    for i in range(1, 13, 1):
+        i = str(i)
+        for thisDetail in [
+                'finalYear', 'finalmonth', 'finalHour', 'finalDate'
+                ]:
+            finalTypeDateString += '{}_{},'.format(
+                    thisDetail, i
+                    )
+    finalTypeDateString = finalTypeDateString[:-1]
     featureList = [
             'userid',
             'justType1',
@@ -161,32 +120,8 @@ def write_feature_name(fileWriter):
             'recentAv11',
             'recentmin10',
             'recentmin11',
-            'finalTypeDate1',
-            'finalTypeDate2',
-            'finalTypeDate3',
-            'finalTypeDate4',
-            'finalTypeDate5',
-            'finalTypeDate6',
-            'finalTypeDate7',
-            'finalTypeDate8',
-            'finalTypeDate9',
-            'finalTypeDate10',
-            'finalTypeDate11',
-            'finalTypeDate12',
             'firstDate',
             'finalDate',
-            'firstTypeDate1',
-            'firstTypeDate2',
-            'firstTypeDate3',
-            'firstTypeDate4',
-            'firstTypeDate5',
-            'firstTypeDate6',
-            'firstTypeDate7',
-            'firstTypeDate8',
-            'firstTypeDate9',
-            'firstTypeDate10',
-            'firstTypeDate11',
-            'firstTypeDate12',
             'finalSecondDate',
             'finalThirdDate',
             'lastDayNum',
@@ -204,10 +139,75 @@ def write_feature_name(fileWriter):
             'lastDayActionNum12',
             'gupiaoOpen',
             'gupiaoChange',
+            firstTypeDateString,
+            finalTypeDateString
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
             )
+
+
+def if_second_in(typeNum, valueDic, valueName):
+    if typeNum in valueDic:
+        outValue = valueDic[typeNum][valueName]
+    else:
+        outValue = ''
+    return outValue
+
+
+def if_value_in(typeNum, valueDic):
+    if typeNum in valueDic:
+        outValue = valueDic[typeNum]
+    else:
+        outValue = 0
+    return outValue
+
+
+def if_value_dic(typeNum, valueDic):
+    if typeNum in valueDic:
+        outValue = valueDic[typeNum]
+    else:
+        outValue = ''
+    return outValue
+
+
+def get_recent_dis(valueDic, timeSort):
+    '''
+    离最近的操作距离
+    '''
+    recentDic = {}
+    nowIndex = timeSort.index(timeSort[-1])
+    for thisTime in timeSort:
+        thisType = valueDic[thisTime]
+        thisDis = nowIndex-timeSort.index(thisTime)
+        if thisType not in recentDic:
+            recentDic[thisType] = thisDis
+        else:
+            if recentDic[thisType] > thisDis:
+                recentDic[thisType] = thisDis
+    return recentDic
+
+
+def read_userDic(actionPath):
+    with open(actionPath, 'rb') as fileReader:
+        count = 0
+        userDic = {}
+        while True:
+            stringLine = fileReader.readline()
+            if stringLine:
+                count += 1
+                if count == 1:
+                    continue
+                stringList = stringLine.strip().decode('utf8').split(',')
+                userId = stringList[0]
+                actionType = stringList[1]
+                actionTime = stringList[2]
+                if userId not in userDic:
+                    userDic[userId] = {}
+                userDic[userId][actionTime] = actionType
+            else:
+                break
+    return userDic
 
 
 def continue_dic():
@@ -355,40 +355,75 @@ def final_type_date():
     '''
     最终最近一次的，不同type的具体时间
     '''
+    def one_dic():
+        return {
+                'finalYear': '',
+                'finalmonth': '',
+                'finalHour': '',
+                'finalWeekend': '',
+                'finalDate': '',
+                }
     finalTypeDate = {
-            '1': '',
-            '2': '',
-            '3': '',
-            '4': '',
-            '5': '',
-            '6': '',
-            '7': '',
-            '8': '',
-            '9': '',
-            '10': '',
-            '11': '',
-            '12': '',
+            '1': one_dic(),
+            '2': one_dic(),
+            '3': one_dic(),
+            '4': one_dic(),
+            '5': one_dic(),
+            '6': one_dic(),
+            '7': one_dic(),
+            '8': one_dic(),
+            '9': one_dic(),
+            '10': one_dic(),
+            '11': one_dic(),
+            '12': one_dic(),
             }
     return finalTypeDate
+
+
+def cal_detail_date(dateUnix):
+    finalYear = int(timer.trans_unix_to_string(dateUnix, '%Y'))
+    finalmonth = int(timer.trans_unix_to_string(dateUnix, '%m'))
+    finalHour = int(timer.trans_unix_to_string(dateUnix, '%H'))
+    finalDay = timer.trans_unix_to_string(dateUnix, '%Y%m%d')
+    finalWeek = datetime.datetime.strptime(finalDay, '%Y%m%d').weekday()
+    if finalWeek == 6 or finalWeek == 7:
+        finalWeekend = 1
+    else:
+        finalWeekend = 0
+    return {
+            'finalYear': finalYear,
+            'finalmonth': finalmonth,
+            'finalHour': finalHour,
+            'finalWeekend': finalWeekend,
+            'finalDate': dateUnix,
+            }
 
 
 def first_type_date():
     '''
     最终最近一次的，不同type的具体时间
     '''
+    def one_dic():
+        return {
+                'finalYear': '',
+                'finalmonth': '',
+                'finalHour': '',
+                'finalWeekend': '',
+                'finalDate': '',
+                }
     firstTypeDate = {
-            '1': '',
-            '2': '',
-            '3': '',
-            '4': '',
-            '5': '',
-            '6': '',
-            '7': '',
-            '8': '',
-            '9': '',
-            '10': '',
-            '11': '',
-            '12': '',
+            '1': one_dic(),
+            '2': one_dic(),
+            '3': one_dic(),
+            '4': one_dic(),
+            '5': one_dic(),
+            '6': one_dic(),
+            '7': one_dic(),
+            '8': one_dic(),
+            '9': one_dic(),
+            '10': one_dic(),
+            '11': one_dic(),
+            '12': one_dic(),
             }
     return firstTypeDate
 
@@ -468,32 +503,36 @@ if __name__ == '__main__':
             con3 = i < totalNum-1
             go9Dis += 1
             # 统计每种type最后一次出现的时间
-            if len(finalTypeDate[thisType]) == 0:
-                finalTypeDate[thisType] = thisTime
+            if len(finalTypeDate[thisType]['finalDate']) == 0:
+                finalTypeDate[thisType] = cal_detail_date(thisTime)
             else:
-                if int(thisTime) > int(finalTypeDate[thisType]):
-                    finalTypeDate[thisType] = thisTime
+                if int(thisTime) > int(finalTypeDate[thisType]['finalDate']):
+                    finalTypeDate[thisType] = cal_detail_date(thisTime)
                 if (thisType == '9') or (thisType == '10') or (
                         thisType == '11'
                         ):
-                    if len(finalTypeDate['12']) == 0:
-                        finalTypeDate['12'] = thisTime
+                    if len(finalTypeDate['12']['finalDate']) == 0:
+                        finalTypeDate['12'] = cal_detail_date(thisTime)
                     else:
-                        if int(thisTime) > int(finalTypeDate['12']):
-                            finalTypeDate['12'] = thisTime
-            if len(firstTypeDate[thisType]) == 0:
-                firstTypeDate[thisType] = thisTime
+                        if int(thisTime) > int(
+                                finalTypeDate['12']['finalDate']
+                                ):
+                            finalTypeDate['12'] = cal_detail_date(thisTime)
+            if len(firstTypeDate[thisType]['finalDate']) == 0:
+                firstTypeDate[thisType] = cal_detail_date(thisTime)
             else:
-                if int(thisTime) < int(firstTypeDate[thisType]):
-                    firstTypeDate[thisType] = thisTime
+                if int(thisTime) < int(firstTypeDate[thisType]['finalDate']):
+                    firstTypeDate[thisType] = cal_detail_date(thisTime)
                 if (thisType == '9') or (thisType == '10') or (
                         thisType == '11'
                         ):
-                    if len(firstTypeDate['12']) == 0:
-                        firstTypeDate['12'] = thisTime
+                    if len(firstTypeDate['12']['finalDate']) == 0:
+                        firstTypeDate['12'] = cal_detail_date(thisTime)
                     else:
-                        if int(thisTime) < int(firstTypeDate['12']):
-                            firstTypeDate['12'] = thisTime
+                        if int(thisTime) < int(
+                                firstTypeDate['12']['finalDate']
+                                ):
+                            firstTypeDate['12'] = cal_detail_date(thisTime)
             # 统计最后一天发生了多少次action操作
             thisDay = timer.trans_unix_to_string(thisTime, format='%Y%m%d')
             if int(thisDay) == int(lastDay):
@@ -529,6 +568,27 @@ if __name__ == '__main__':
                     typeDisDic[useType]['min'] = typeDis
                 elif typeDisDic[useType]['min'] > typeDis:
                     typeDisDic[useType]['min'] = typeDis
+        # 最后和最开始时间的细化结合
+        firstTypeDateString = ''
+        for i in range(1, 13, 1):
+            i = str(i)
+            for thisDetail in [
+                    'finalYear', 'finalmonth', 'finalHour', 'finalDate'
+                    ]:
+                firstTypeDateString += '{},'.format(
+                        firstTypeDate[i][thisDetail]
+                        )
+        firstTypeDateString = firstTypeDateString[:-1]
+        finalTypeDateString = ''
+        for i in range(1, 13, 1):
+            i = str(i)
+            for thisDetail in [
+                    'finalYear', 'finalmonth', 'finalHour', 'finalDate'
+                    ]:
+                finalTypeDateString += '{},'.format(
+                        finalTypeDate[i][thisDetail]
+                        )
+        finalTypeDateString = finalTypeDateString[:-1]
         # 离最近的时间
         recentTimeDic = get_recent_dic(valueDic, timeSort)
         recent10 = if_second_in('10', recentTimeDic, 'nowTime')
@@ -684,32 +744,8 @@ if __name__ == '__main__':
                 str(recentAv11),
                 str(recentmin10),
                 str(recentmin11),
-                str(finalTypeDate['1']),
-                str(finalTypeDate['2']),
-                str(finalTypeDate['3']),
-                str(finalTypeDate['4']),
-                str(finalTypeDate['5']),
-                str(finalTypeDate['6']),
-                str(finalTypeDate['7']),
-                str(finalTypeDate['8']),
-                str(finalTypeDate['9']),
-                str(finalTypeDate['10']),
-                str(finalTypeDate['11']),
-                str(finalTypeDate['12']),
                 str(firstDate),
                 str(finalDate),
-                str(firstTypeDate['1']),
-                str(firstTypeDate['2']),
-                str(firstTypeDate['3']),
-                str(firstTypeDate['4']),
-                str(firstTypeDate['5']),
-                str(firstTypeDate['6']),
-                str(firstTypeDate['7']),
-                str(firstTypeDate['8']),
-                str(firstTypeDate['9']),
-                str(firstTypeDate['10']),
-                str(firstTypeDate['11']),
-                str(firstTypeDate['12']),
                 str(finalSecondDate),
                 str(finalThirdDate),
                 str(lastDayNum),                    # 最后一天发生了多少次action操作
@@ -727,6 +763,8 @@ if __name__ == '__main__':
                 str(lastDayActionNum['12']),
                 str(gupiaoOpen),
                 str(gupiaoChange),
+                firstTypeDateString,
+                finalTypeDateString
                 ]
 
         fileWriter.write(
