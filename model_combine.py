@@ -24,7 +24,7 @@ def get_lightgbm_c():
     lightgbm_c_param = {
             'learning_rate': 0.05,
             'num_leaves': 60,
-            'num_trees': 500,
+            'num_trees': 570,
             'min_sum_hessian_in_leaf': 0.2,
             'min_data_in_leaf': 70,
             'bagging_fraction': 0.5,
@@ -43,7 +43,7 @@ def get_lightgbm_r():
     lightgbm_r_param = {
             'learning_rate': 0.05,
             'num_leaves': 50,
-            'num_trees': 480,
+            'num_trees': 550,
             'min_sum_hessian_in_leaf': 0.0575,
             'min_data_in_leaf': 50,
             'bagging_fraction': 0.3,
@@ -68,7 +68,7 @@ def get_xgboost_c():
             'col_sample_bytree': 0.4,
             'min_child_weight': 1,
             'reg_lambda': 13.25,
-            'num_roud': 700,
+            'num_roud': 800,
             'objective': 'binary:logistic',
             }
     xgboost_c = few_model.Xgboost(xgboost_c_param)
@@ -85,7 +85,7 @@ def get_xgboost_r():
             'col_sample_bytree': 0.4,
             'min_child_weight': 11,
             'reg_lambda': 50,
-            'num_roud': 500,
+            'num_roud': 600,
             'objective': 'reg:linear',
             }
     xgboost_r = few_model.Xgboost(xgboost_r_param)
@@ -137,7 +137,7 @@ class RF:
 class GBDT:
     def __init__(self, trainX):
         param = {
-                'n_estimators': 250,
+                'n_estimators': 300,
                 'learning_rate': 0.1,
                 'subsample': 0.8,
                 'max_features': 0.4,
