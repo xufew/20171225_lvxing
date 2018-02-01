@@ -17,7 +17,7 @@ def predict(modelSavePath, xgboost):
     inputPath = Config.TEST_DATA_PATH
     savePath = './data/tmp_result.csv'
     comparePath = Config.RESULT_FINAL_TRANS
-    finalPath = Config.RESULT_XGBOOST_C
+    finalPath = Config.RESULT_XGBOOST_R
     testX = pd.read_table(inputPath, sep=',', index_col=0)
     testX = testX.drop(['orderType'], axis=1)
     with open(modelSavePath, 'rb') as fileReader:
@@ -51,7 +51,7 @@ def line_search(trainX, trainY):
 
 if __name__ == '__main__':
     inputPath = Config.TRAIN_DATA_PATH
-    modelSavePath = Config.MODEL_XGBOOST_C
+    modelSavePath = Config.MODEL_XGBOOST_R
     trainData = pd.read_table(inputPath, sep=',', index_col=0)
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']

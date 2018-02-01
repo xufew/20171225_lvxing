@@ -65,11 +65,17 @@ def process_list(stringList, provinceValue):
     gender = stringList[1]
     province = stringList[2]
     age = stringList[3]
+    if len(stringList) > 4:
+        useridUse = userId
+        userId = stringList[4]
+    else:
+        useridUse = userId
     genderList = few_model.Preprocessor.one_hot(genderDic, gender)
     provinceList = few_model.Preprocessor.one_hot(provinceDic, province)
     ageList = few_model.Preprocessor.one_hot(ageDic, age)
     outString = '{},{},{},{},{}'.format(
             userId,
+            useridUse,
             genderList,
             provinceList,
             ageList,
@@ -123,6 +129,7 @@ if __name__ == '__main__':
                 if count == 1:
                     outString = '{},{},{},{},{}'.format(
                             'userid',
+                            'useridUse',
                             get_hot_name(genderDic),
                             get_hot_name(provinceDic),
                             get_hot_name(ageDic),

@@ -24,7 +24,7 @@ def get_lightgbm_c():
     lightgbm_c_param = {
             'learning_rate': 0.05,
             'num_leaves': 60,
-            'num_trees': 570,
+            'num_trees': 500,
             'min_sum_hessian_in_leaf': 0.2,
             'min_data_in_leaf': 70,
             'bagging_fraction': 0.5,
@@ -43,7 +43,7 @@ def get_lightgbm_r():
     lightgbm_r_param = {
             'learning_rate': 0.05,
             'num_leaves': 50,
-            'num_trees': 550,
+            'num_trees': 480,
             'min_sum_hessian_in_leaf': 0.0575,
             'min_data_in_leaf': 50,
             'bagging_fraction': 0.3,
@@ -68,7 +68,7 @@ def get_xgboost_c():
             'col_sample_bytree': 0.4,
             'min_child_weight': 1,
             'reg_lambda': 13.25,
-            'num_roud': 800,
+            'num_roud': 700,
             'objective': 'binary:logistic',
             }
     xgboost_c = few_model.Xgboost(xgboost_c_param)
@@ -85,7 +85,7 @@ def get_xgboost_r():
             'col_sample_bytree': 0.4,
             'min_child_weight': 11,
             'reg_lambda': 50,
-            'num_roud': 600,
+            'num_roud': 500,
             'objective': 'reg:linear',
             }
     xgboost_r = few_model.Xgboost(xgboost_r_param)
@@ -137,7 +137,7 @@ class RF:
 class GBDT:
     def __init__(self, trainX):
         param = {
-                'n_estimators': 300,
+                'n_estimators': 250,
                 'learning_rate': 0.1,
                 'subsample': 0.8,
                 'max_features': 0.4,
@@ -262,8 +262,17 @@ class AdaBoost:
 def predict_up(lr):
     # 进行结果拼接
     reLightgbmC = pd.read_table(Config.RESULT_LIGHTGBM_CL, sep=',')
+    reLightgbmR = pd.read_table(Config.RESULT_LIGHTGBM_R, sep=',')
     reXgboostC = pd.read_table(Config.RESULT_XGBOOST_C, sep=',')
-    reList = [reLightgbmC, reXgboostC]
+    reXgboostR = pd.read_table(Config.RESULT_XGBOOST_R, sep=',')
+    reRf = pd.read_table(Config.RESULT_RF, sep=',')
+    reExtratree = pd.read_table(Config.RESULT_EXTRATREE, sep=',')
+    reAdaboost = pd.read_table(Config.RESULT_ADABOOST, sep=',')
+    reGbdt = pd.read_table(Config.RESULT_GBDT, sep=',')
+    reList = [
+            reLightgbmC, reLightgbmR, reXgboostC, reXgboostR,
+            reRf, reExtratree, reAdaboost, reGbdt
+            ]
     predictX = []
     for result in reList:
         if len(predictX) == 0:
@@ -274,6 +283,7 @@ def predict_up(lr):
                     left_on='userid', right_on='userid'
                     )
     predictX = predictX.set_index('userid')
+    print(predictX)
     # 进行预测存储
     predictY = lr.predict(lr.model, predictX)
     predictY = (0.8*predictX.iloc[:, 0] + 0.2*predictX.iloc[:, 1]).values
@@ -315,19 +325,19 @@ if __name__ == '__main__':
         lightgbm_r = get_lightgbm_r()
         xgboost_c = get_xgboost_c()
         xgboost_r = get_xgboost_r()
-        rf = RF(trainX)
-        extratree = ExtraTree(trainX)
-        adaboost = AdaBoost(trainX)
-        gbdt = GBDT(trainX)
+        rf = RF(trainX.copy())
+        extratree = ExtraTree(trainX.copy())
+        adaboost = AdaBoost(trainX.copy())
+        gbdt = GBDT(trainX.copy())
         # 训练模型
-        lightgbm_c.train(trainX.copy(), trainY, lightgbm_c_path)
-        lightgbm_r.train(trainX.copy(), trainY, lightgbm_r_path)
-        xgboost_c.train(trainX.copy(), trainY, xgboost_c_path)
-        xgboost_r.train(trainX.copy(), trainY, xgboost_r_path)
-        rf.train(trainX.copy(), trainY)
-        extratree.train(trainX.copy(), trainY)
-        adaboost.train(trainX.copy(), trainY)
-        gbdt.train(trainX.copy(), trainY)
+        lightgbm_c.train(trainX.copy(), trainY.copy(), lightgbm_c_path)
+        lightgbm_r.train(trainX.copy(), trainY.copy(), lightgbm_r_path)
+        xgboost_c.train(trainX.copy(), trainY.copy(), xgboost_c_path)
+        xgboost_r.train(trainX.copy(), trainY.copy(), xgboost_r_path)
+        rf.train(trainX.copy(), trainY.copy())
+        extratree.train(trainX.copy(), trainY.copy())
+        adaboost.train(trainX.copy(), trainY.copy())
+        gbdt.train(trainX.copy(), trainY.copy())
         # 预测的结果进行拼装，准备进行第二次训练
         predictLightgbmC = lightgbm_c.predict(
                 testX.copy(), load_model(lightgbm_c_path)
@@ -373,7 +383,7 @@ if __name__ == '__main__':
     # # 组合模型训练
     # trainData = pd.read_table('./model/tmp_combine_train.csv', sep=',', index_col=0)
     # trainX = trainData.drop(['orderType'], axis=1)
-    # trainX = trainX.drop(['4'], axis=1)
+    # # trainX = trainX.drop(['4'], axis=1)
     # trainY = trainData['orderType']
     # param = {
     #         'penalty': 'l2',
@@ -388,7 +398,9 @@ if __name__ == '__main__':
     #         'nfold': 10,
     #         'verbose': 1,
     #         }
+    # ev = few_model.Evaluator.Zero_One()
     # lr = few_model.LR(param)
-    # lr.cv(trainX, trainY)
+    # # lr.cv(trainX, trainY)
+    # lr.train(trainX, trainY)
     # # 进行合并结果的预测
     # predict_up(lr)

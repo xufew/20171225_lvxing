@@ -202,7 +202,8 @@ def __trans_user_profile(userDic, inputPath, outPath):
                         transDic = userDic[userid]
                         for transId in transDic:
                             newList = stringList.copy()
-                            newList[0] = transId
+                            newList[3] = newList[3].strip()
+                            newList.append(transId+'\n')
                             fileWriter.write(
                                     ','.join(newList)
                                     )
@@ -262,7 +263,7 @@ def __trans_user_comment(userDic, inputPath, outPath):
 
 
 if __name__ == '__main__':
-    # # 测试样本转为训练样本
+    # 测试样本转为训练样本
     take_test_sample()
     # 提取已经发生的样本,训练
     userDic = __type_1_place(Config.ORDER_HISTORY_TRAIN, '987654321')

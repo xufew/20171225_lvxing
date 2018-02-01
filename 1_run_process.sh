@@ -45,7 +45,7 @@ OUT_ORDER_HISTORY_TRAIN='./data/test_use/orderHistory_test.csv'
 OUT_USER_COMMENT_TRAIN='./data/test_use/userComment_test.csv'
 OUT_ACTION='./data/test_use/action_test.csv'
 OUT_ACTION_1='./data/test_use/action_test_1.csv'
-OUT_ACTION_2='./data/test_use/action_train_2.csv'
+OUT_ACTION_2='./data/test_use/action_test_2.csv'
 OUT_LABEL_TRAIN='./data/test_use/label_test.csv'
 
 # # 处理用户个人信息
@@ -63,4 +63,4 @@ OUT_LABEL_TRAIN='./data/test_use/label_test.csv'
 # # 增加新的action特征
 # python3 process_action_3.py $OUT_ACTION_WITH_HISTORY $OUT_ACTION_2 || exit 1
 # # 进行训练集维度的合并
-# python3 process_combine.py $OUT_USER_PROFILE_TRAIN $OUT_ORDER_HISTORY_TRAIN $OUT_USER_COMMENT_TRAIN $LABEL_TRAIN $OUT_ACTION $OUT_ACTION_1 $OUT_ACTION_2 $OUT_LABEL_TRAIN || exit 1
+# python3 process_combine.py $OUT_USER_PROFILE_TRAIN $OUT_ORDER_HISTORY_TRAIN $OUT_USER_COMMENT_TRAIN $OUT_ACTION $OUT_ACTION_1 $OUT_ACTION_2 $OUT_LABEL_TRAIN || exit 1
