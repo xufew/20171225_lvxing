@@ -60,7 +60,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 60,
-            'num_trees': 1000,
+            'num_trees': 490,
             'min_sum_hessian_in_leaf': 0.2,
             'min_data_in_leaf': 70,
             'bagging_fraction': 0.5,
@@ -72,17 +72,17 @@ if __name__ == '__main__':
             'application': 'binary',
             }
     lightgbm = few_model.Lightgbm(params)
-    # 交叉验证
-    evalDic = lightgbm.cv(trainX, trainY)
-    # # 开始训练
-    # trainModel = lightgbm.train(trainX, trainY, modelPath)
-    # with open('./tmp_feature_im', 'wb') as fileWriter:
-    #     for thisIndex in trainModel.featureIm.index:
-    #         value = trainModel.featureIm[thisIndex]
-    #         fileWriter.write(
-    #                 '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
-    #                 )
-    # # 预测
-    # predict(modelPath)
+    # # 交叉验证
+    # evalDic = lightgbm.cv(trainX, trainY)
+    # 开始训练
+    trainModel = lightgbm.train(trainX, trainY, modelPath)
+    with open('./tmp_feature_im', 'wb') as fileWriter:
+        for thisIndex in trainModel.featureIm.index:
+            value = trainModel.featureIm[thisIndex]
+            fileWriter.write(
+                    '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
+                    )
+    # 预测
+    predict(modelPath)
     # # 寻找最优变量
     # line_search(trainX, trainY)
