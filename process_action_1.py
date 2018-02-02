@@ -5,6 +5,7 @@
 # ============
 import sys
 import datetime
+import copy
 
 import numpy as np
 import tushare as ts
@@ -192,6 +193,7 @@ def read_userDic(actionPath):
     with open(actionPath, 'rb') as fileReader:
         count = 0
         userDic = {}
+        instead9Dic = {}
         while True:
             stringLine = fileReader.readline()
             if stringLine:
@@ -204,9 +206,94 @@ def read_userDic(actionPath):
                 actionTime = stringList[2]
                 if userId not in userDic:
                     userDic[userId] = {}
-                userDic[userId][actionTime] = actionType
+                    instead9Dic[userId] = {'9': [], '10': [], '11': []}
+                if actionTime in userDic[userId]:
+                    while True:
+                        actionTime = str(int(actionTime)+1)
+                        if actionTime not in userDic[userId]:
+                            userDic[userId][actionTime] = actionType
+                            if (actionType == '9') or (actionType == '10') or (
+                                    actionType == '11'
+                                    ):
+                                instead9Dic[userId][actionType].append(
+                                        actionTime
+                                        )
+                            break
+                else:
+                    userDic[userId][actionTime] = actionType
+                    if (actionType == '9') or (actionType == '10') or (
+                            actionType == '11'
+                            ):
+                        instead9Dic[userId][actionType].append(
+                                actionTime
+                                )
             else:
                 break
+    # 进行9的时间合并
+    for userid in instead9Dic:
+        insteadDic = instead9Dic[userid]
+        timeDic = userDic[userid]
+        for nineTime in insteadDic['9']:
+            nineTime = int(nineTime)
+            # 合并10
+            ifContinue = True
+            for tenTime in copy.deepcopy(insteadDic['10']):
+                tenTime = int(tenTime)
+                thisRange = abs(nineTime - tenTime)
+                if thisRange < 200:
+                    changeTime = str(max(nineTime, tenTime))
+                    timeDic.pop(str(nineTime))
+                    if changeTime in timeDic:
+                        while True:
+                            changeTime = str(int(changeTime)+1)
+                            if changeTime not in timeDic:
+                                timeDic[changeTime] = '9'
+                                break
+                    else:
+                        timeDic[changeTime] = '9'
+                    insteadDic['10'].remove(str(tenTime))
+                    ifContinue = False
+                    break
+            if ifContinue:
+                # 合并11
+                for eleTime in copy.deepcopy(insteadDic['11']):
+                    eleTime = int(eleTime)
+                    thisRange = abs(nineTime - eleTime)
+                    if thisRange < 200:
+                        changeTime = str(max(nineTime, eleTime))
+                        timeDic.pop(str(nineTime))
+                        if changeTime in timeDic:
+                            while True:
+                                changeTime = str(int(changeTime)+1)
+                                if changeTime not in timeDic:
+                                    timeDic[changeTime] = '9'
+                                    break
+                        else:
+                            timeDic[changeTime] = '9'
+                        insteadDic['11'].remove(str(eleTime))
+                        break
+        # 将没有任何操作的填入当做9
+        if len(insteadDic['10']) != 0:
+            for addTime in insteadDic['10']:
+                if addTime in timeDic:
+                    while True:
+                        addTime = str(int(addTime)+1)
+                        if addTime not in timeDic:
+                            timeDic[addTime] = '9'
+                            break
+                else:
+                    timeDic[addTime] = '9'
+        if len(insteadDic['11']) != 0:
+            for addTime in insteadDic['11']:
+                timeDic[addTime] = '9'
+                if addTime in timeDic:
+                    while True:
+                        addTime = str(int(addTime)+1)
+                        if addTime not in timeDic:
+                            timeDic[addTime] = '9'
+                            break
+                else:
+                    timeDic[addTime] = '9'
     return userDic
 
 

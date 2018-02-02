@@ -17,6 +17,15 @@ ageDic = {
         '00后': 4,
         }
 
+ageNum = {
+        '': '',
+        '60后': 60,
+        '70后': 70,
+        '80后': 80,
+        '90后': 90,
+        '00后': 100,
+        }
+
 genderDic = {
         '男': 0,
         '女': 1,
@@ -73,13 +82,14 @@ def process_list(stringList, provinceValue):
     genderList = few_model.Preprocessor.one_hot(genderDic, gender)
     provinceList = few_model.Preprocessor.one_hot(provinceDic, province)
     ageList = few_model.Preprocessor.one_hot(ageDic, age)
-    outString = '{},{},{},{},{}'.format(
+    outString = '{},{},{},{},{},{},{}'.format(
             userId,
             useridUse,
             genderList,
             provinceList,
             ageList,
             ','.join(provinceValue[province]),
+            ageNum[age],
             )
     return outString
 
@@ -127,13 +137,14 @@ if __name__ == '__main__':
                 count += 1
                 stringList = stringLine.strip().decode('utf8').split(',')
                 if count == 1:
-                    outString = '{},{},{},{},{}'.format(
+                    outString = '{},{},{},{},{},{},{}'.format(
                             'userid',
                             'useridUse',
                             get_hot_name(genderDic),
                             get_hot_name(provinceDic),
                             get_hot_name(ageDic),
                             provinceName,
+                            'ageNum',
                             )
                 else:
                     outString = process_list(stringList, provinceValue)

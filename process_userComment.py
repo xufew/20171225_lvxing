@@ -25,6 +25,8 @@ def process_line(stringList, userDic):
         userDic[userId]['jingxiword'] = 1
     # 提取短语长度
     userDic[userId]['specialLen'] = len(comment)
+    # 评论订单id
+    userDic[userId]['pinglunTime'] = orderId
 
 
 def __init_user():
@@ -33,6 +35,7 @@ def __init_user():
             'goodScoreTime': 0,
             'jingxiword': 0,
             'specialLen': '',
+            'pinglunTime': '',
             }
     return outDic
 
@@ -64,6 +67,7 @@ if __name__ == '__main__':
                     'goodScoreTime',
                     'jingxiword',
                     'specialLen',
+                    'pinglunTime',
                     ]
             fileWriter.write(
                     '{}\n'.format(','.join(nameList)).encode('utf8')
@@ -73,12 +77,14 @@ if __name__ == '__main__':
         goodScoreTime = infoDic['goodScoreTime']
         jingxiword = infoDic['jingxiword']
         specialLen = infoDic['specialLen']
+        pinglunTime = infoDic['pinglunTime']
         outList = [
                 userId,
                 str(badScoreTime),
                 str(goodScoreTime),
                 str(jingxiword),
                 str(specialLen),
+                str(pinglunTime),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')
