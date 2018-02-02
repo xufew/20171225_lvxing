@@ -19,7 +19,6 @@ def predict(modelPath):
     comparePath = Config.RESULT_FINAL_TRANS
     finalPath = Config.RESULT_LIGHTGBM_CL
     testX = pd.read_table(inputPath, sep=',', index_col=0)
-    testX = testX.drop(['orderType'], axis=1)
     with open(modelPath, 'rb') as fileReader:
         gbmModel = pickle.load(fileReader)
     predictValue = lightgbm.predict(testX, gbmModel)

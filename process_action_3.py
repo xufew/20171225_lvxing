@@ -6,6 +6,7 @@
 import sys
 import datetime
 import copy
+import math
 
 import few_base
 
@@ -16,6 +17,23 @@ def write_feature_name(fileWriter):
             'finalYear',
             'finalmonth',
             'finalHour',
+            'totalAction',
+            'rangePer1',
+            'rangePer2',
+            'rangePer3',
+            'rangePer4',
+            'rangePer5',
+            'rangePer6',
+            'rangePer7',
+            'rangePer8',
+            'rangePer9',
+            'rangePer10',
+            'rangePer11',
+            'rangeNum9',
+            'dateLow',
+            'dateHigh',
+            'dateContinue',
+            'dateCut',
             ]
     fileWriter.write(
             '{}\n'.format(','.join(featureList)).encode('utf8')
@@ -137,6 +155,24 @@ def if_in(value, valueList):
         return 0
 
 
+def range_day_action():
+    lastDayActionNum = {
+            '1': 0,
+            '2': 0,
+            '3': 0,
+            '4': 0,
+            '5': 0,
+            '6': 0,
+            '7': 0,
+            '8': 0,
+            '9': 0,
+            '10': 0,
+            '11': 0,
+            'total': 0,
+            }
+    return lastDayActionNum
+
+
 if __name__ == '__main__':
     actionPath = sys.argv[1]
     outPath = sys.argv[2]
@@ -166,12 +202,64 @@ if __name__ == '__main__':
             finalWeekend = 1
         else:
             finalWeekend = 0
+        totalAction = len(timeSort)
+        # 最近一段时间发生过的行为
+        finalDate = int(timeSort[-1])
+        rangeNumDic = range_day_action()
+        for thisTime in timeSort:
+            thisTime = int(thisTime)
+            if finalDate-thisTime > 1209600:
+                # 大于这个时间的不进行统计
+                continue
+            thisAction = valueDic[str(thisTime)]
+            rangeNumDic[thisAction] += 1
+            rangeNumDic['total'] += 1
+        # 最近的时间处于哪个时间节点内
+        finalDate = int(timeSort[-1])
+        if finalDate < 1.4782*math.pow(10, 9):
+            dateLow = 1
+        else:
+            dateLow = 0
+        con1 = finalDate >= 1.4782*math.pow(10, 9)
+        con2 = finalDate < 1.491*math.pow(10, 9)
+        if con1 and con2:
+            dateHigh = 1
+        else:
+            dateHigh = 0
+        con1 = finalDate >= 1.491*math.pow(10, 9)
+        con2 = finalDate < 1.503*math.pow(10, 9)
+        if con1 and con2:
+            dateContinue = 1
+        else:
+            dateContinue = 0
+        con1 = finalDate >= 1.503*math.pow(10, 9)
+        if con1:
+            dateCut = 1
+        else:
+            dateCut = 0
         # 进行结果综合
         outList = [
                 userId,
                 str(finalYear),
                 str(finalmonth),
                 str(finalHour),
+                str(totalAction),
+                str(rangeNumDic['1']/float(rangeNumDic['total'])),
+                str(rangeNumDic['2']/float(rangeNumDic['total'])),
+                str(rangeNumDic['3']/float(rangeNumDic['total'])),
+                str(rangeNumDic['4']/float(rangeNumDic['total'])),
+                str(rangeNumDic['5']/float(rangeNumDic['total'])),
+                str(rangeNumDic['6']/float(rangeNumDic['total'])),
+                str(rangeNumDic['7']/float(rangeNumDic['total'])),
+                str(rangeNumDic['8']/float(rangeNumDic['total'])),
+                str(rangeNumDic['9']/float(rangeNumDic['total'])),
+                str(rangeNumDic['10']/float(rangeNumDic['total'])),
+                str(rangeNumDic['11']/float(rangeNumDic['total'])),
+                str(rangeNumDic['9']),
+                str(dateLow),
+                str(dateHigh),
+                str(dateContinue),
+                str(dateCut),
                 ]
         fileWriter.write(
                 '{}\n'.format(','.join(outList)).encode('utf8')

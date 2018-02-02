@@ -7,7 +7,7 @@ import pandas as pd
 
 
 COLUMN_PER = 1                   # 剔除的列含na量
-ROW_PER = 0.9                      # 剔除的行含na量
+ROW_PER = 0.9                    # 剔除的行含na量
 
 
 DELETE_DIC = {
@@ -38,13 +38,17 @@ def delete_na(inputData):
     print(DELETE_DIC)
 
 
-def drop(inputData):
+def drop(inputData, dropType='train'):
     '''
     丢弃数据
     '''
-    dropCol = inputData.drop(DELETE_DIC['column'], axis=1)
-    dropRow = dropCol.drop(DELETE_DIC['row'], axis=0)
-    return dropRow
+    if dropType == 'train':
+        dropCol = inputData.drop(DELETE_DIC['column'], axis=1)
+        dropRow = dropCol.drop(DELETE_DIC['row'], axis=0)
+        return dropRow
+    elif dropType == 'test':
+        dropCol = inputData.drop(DELETE_DIC['column'], axis=1)
+        return dropCol
 
 
 if __name__ == '__main__':
@@ -54,9 +58,16 @@ if __name__ == '__main__':
     outTest = './data/test_use/label_test_drop.csv'
     # 处理na
     trainData = read_data(trainPath)
+    DELETE_DIC['row'] += list(
+            trainData.loc[trainData.totalAction.isnull(), :].index
+            )
+    DELETE_DIC['row'] += list(
+            trainData.loc[trainData.totalAction > 800, :].index
+            )
+    DELETE_DIC['column'] += ['totalAction']
     delete_na(trainData)
     trainData = drop(trainData)
     trainData.to_csv(outTrain, sep=',')
     testData = read_data(testPath)
-    testData = drop(testData)
+    testData = drop(testData, 'test')
     testData.to_csv(outTest, sep=',')
