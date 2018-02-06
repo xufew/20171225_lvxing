@@ -19,7 +19,6 @@ def predict(modelSavePath, xgboost):
     comparePath = Config.RESULT_FINAL_TRANS
     finalPath = Config.RESULT_XGBOOST_R
     testX = pd.read_table(inputPath, sep=',', index_col=0)
-    testX = testX.drop(['orderType'], axis=1)
     with open(modelSavePath, 'rb') as fileReader:
         gbdtModel = pickle.load(fileReader)
     predictValue = xgboost.predict(testX, gbdtModel)
@@ -56,7 +55,7 @@ if __name__ == '__main__':
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']
     # 开始交叉验证
-    setNa = -9999999999999999999
+    setNa = -9999999
     inputParam = {
             'eta': 0.05,
             'naData': setNa,

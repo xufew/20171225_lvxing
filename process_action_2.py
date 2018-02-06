@@ -11,9 +11,9 @@ from copy import deepcopy
 def write_feature_name(fileWriter, pathCountDic, pathCountName):
     pathString = ''
     for thisPath in pathCountName:
-        pathString += '{},'.format(thisPath+'countNum')
-        pathString += '{},'.format(thisPath+'startTime')
-        pathString += '{},'.format(thisPath+'endTime')
+        # pathString += '{},'.format(thisPath+'countNum')
+        # pathString += '{},'.format(thisPath+'startTime')
+        # pathString += '{},'.format(thisPath+'endTime')
         pathString += '{},'.format(thisPath+'range')
     pathString = pathString[:-1]
     featureList = [
@@ -100,9 +100,9 @@ if __name__ == '__main__':
                         int(endDate)-int(startDate)
         pathString = ''
         for thisPath in pathCountName:
-            pathString += '{},'.format(userPathCount[thisPath]['countNum'])
-            pathString += '{},'.format(userPathCount[thisPath]['startTime'])
-            pathString += '{},'.format(userPathCount[thisPath]['endTime'])
+            # pathString += '{},'.format(userPathCount[thisPath]['countNum'])
+            # pathString += '{},'.format(userPathCount[thisPath]['startTime'])
+            # pathString += '{},'.format(userPathCount[thisPath]['endTime'])
             pathString += '{},'.format(userPathCount[thisPath]['range'])
         pathString = pathString[:-1]
         # 进行结果综合

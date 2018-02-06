@@ -18,7 +18,6 @@ def predict(modelSavePath, gbdt, naProducer):
     comparePath = Config.RESULT_FINAL_TRANS
     finalPath = Config.RESULT_GBDT
     testX = pd.read_table(inputPath, sep=',', index_col=0)
-    testX = testX.drop(['orderType'], axis=1)
     testX = testX.apply(
             lambda x: x.fillna(naProducer.get())
             )

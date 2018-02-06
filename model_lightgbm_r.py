@@ -19,7 +19,6 @@ def predict(modelPath):
     comparePath = Config.RESULT_FINAL_TRANS
     finalPath = Config.RESULT_LIGHTGBM_R
     testX = pd.read_table(inputPath, sep=',', index_col=0)
-    testX = testX.drop(['orderType'], axis=1)
     with open(modelPath, 'rb') as fileReader:
         gbmModel = pickle.load(fileReader)
     predictValue = lightgbm.predict(testX, gbmModel)
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     params = {
             'learning_rate': 0.05,
             'num_leaves': 50,
-            'num_trees': 550,
+            'num_trees': 500,
             'min_sum_hessian_in_leaf': 0.0575,
             'min_data_in_leaf': 50,
             'bagging_fraction': 0.3,
@@ -74,14 +73,14 @@ if __name__ == '__main__':
     lightgbm = few_model.Lightgbm(params)
     # # 交叉验证
     # evalDic = lightgbm.cv(trainX, trainY)
-    # 开始训练
-    trainModel = lightgbm.train(trainX, trainY, modelPath)
-    with open('./tmp_feature_im', 'wb') as fileWriter:
-        for thisIndex in trainModel.featureIm.index:
-            value = trainModel.featureIm[thisIndex]
-            fileWriter.write(
-                    '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
-                    )
+    # # 开始训练
+    # trainModel = lightgbm.train(trainX, trainY, modelPath)
+    # with open('./tmp_feature_im', 'wb') as fileWriter:
+    #     for thisIndex in trainModel.featureIm.index:
+    #         value = trainModel.featureIm[thisIndex]
+    #         fileWriter.write(
+    #                 '{}\t==={}===\n'.format(thisIndex, value).encode('utf8')
+    #                 )
     # 预测
     predict(modelPath)
     # # 寻找最优变量

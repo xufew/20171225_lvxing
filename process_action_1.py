@@ -27,7 +27,7 @@ def write_feature_name(fileWriter):
     for i in range(1, 13, 1):
         i = str(i)
         for thisDetail in [
-                'finalYear', 'finalmonth', 'finalHour', 'finalDate'
+                'firstYear', 'firstmonth', 'firstHour', 'firstDate'
                 ]:
             firstTypeDateString += '{}_{},'.format(
                     thisDetail, i
