@@ -34,7 +34,9 @@ ALL_LABEL = './data/train/orderFuture_all.csv'
 # 训练相关
 # #############################
 TRAIN_DATA_PATH = './data/train_use/label_train_drop.csv'
+# TRAIN_DATA_PATH = './tmp/tmp_5/tmp_train_his'
 TEST_DATA_PATH = './data/test_use/label_test_drop.csv'
+# TEST_DATA_PATH = './tmp/tmp_4/tmp_test'
 
 MODEL_LIGHTGBM_CL = './model/lightgbm_cl.pkl'
 MODEL_LIGHTGBM_R = './model/lightgbm_r.pkl'

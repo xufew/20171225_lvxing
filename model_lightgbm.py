@@ -19,6 +19,7 @@ def predict(modelPath):
     comparePath = Config.RESULT_FINAL_TRANS
     finalPath = Config.RESULT_LIGHTGBM_CL
     testX = pd.read_table(inputPath, sep=',', index_col=0)
+    print(testX.shape)
     with open(modelPath, 'rb') as fileReader:
         gbmModel = pickle.load(fileReader)
     predictValue = lightgbm.predict(testX, gbmModel)
@@ -54,13 +55,14 @@ if __name__ == '__main__':
     inputPath = Config.TRAIN_DATA_PATH
     modelPath = Config.MODEL_LIGHTGBM_CL
     trainData = pd.read_table(inputPath, sep=',', index_col=0)
+    print(trainData.shape)
     # 删除无用纬度和数据
     trainX = trainData.drop(['orderType'], axis=1)
     trainY = trainData['orderType']
     params = {
             'learning_rate': 0.05,
             'num_leaves': 60,
-            'num_trees': 550,
+            'num_trees': 660,
             'min_sum_hessian_in_leaf': 0.2,
             'min_data_in_leaf': 70,
             'bagging_fraction': 0.5,

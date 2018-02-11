@@ -106,7 +106,7 @@ def __cat_file(inputFile1, inputFile2, outFile):
     os.system(runSh)
 
 
-def __type_1_place(hisPath, idStart='987654321'):
+def __type_1_place(hisPath, idStart='987654321', addData=[]):
     '''
     记录购买精品订单1的节点，用来制造训练集
     '''
@@ -114,6 +114,7 @@ def __type_1_place(hisPath, idStart='987654321'):
         count = 0
         userDic = {}
         skipDic = {}
+        labelDic = {}
         while True:
             stringLine = fileReader.readline()
             if stringLine:
@@ -124,7 +125,9 @@ def __type_1_place(hisPath, idStart='987654321'):
                 userid = stringList[0]
                 orderTime = int(stringList[2])
                 orderType = stringList[3]
-                if orderType == '1':
+                con1 = orderType == '1'
+                # con2 = int(userid) in addData
+                if con1:
                     if userid not in userDic:
                         userDic[userid] = {}
                         skipDic[userid] = []
@@ -133,11 +136,14 @@ def __type_1_place(hisPath, idStart='987654321'):
                                 '{}{}'.format(idStart, count)
                                 ] = orderTime
                         skipDic[userid].append(orderTime)
+                        labelDic[
+                                '{}{}'.format(idStart, count)
+                                ] = orderType
                     else:
                         continue
             else:
                 break
-    return userDic
+    return userDic, labelDic
 
 
 def __trans_action(userDic, inputPath, outPath):
@@ -170,17 +176,15 @@ def __trans_action(userDic, inputPath, outPath):
                     break
 
 
-def __trans_label(userDic, outPath):
+def __trans_label(labelDic, outPath):
     '''
     转换标签
     '''
     with open(outPath, 'a') as fileWriter:
-        for userid in userDic:
-            transDic = userDic[userid]
-            for transid in transDic:
-                fileWriter.write(
-                        '{},{}\n'.format(transid, 1)
-                        )
+        for userid in labelDic:
+            fileWriter.write(
+                    '{},{}\n'.format(userid, labelDic[userid])
+                     )
 
 
 def __trans_user_profile(userDic, inputPath, outPath):
@@ -238,7 +242,7 @@ def __trans_order_his(userDic, inputPath, outPath):
                     break
 
 
-def __trans_user_comment(userDic, inputPath, outPath):
+def __trans_user_comment(userDic, inputPath, outPath, idTimeDic):
     with open(inputPath, 'rb') as fileReader:
         with open(outPath, 'a') as fileWriter:
             count = 0
@@ -250,46 +254,88 @@ def __trans_user_comment(userDic, inputPath, outPath):
                         continue
                     stringList = stringLine.decode('utf8').split(',')
                     userid = stringList[0]
+                    orderId = stringList[1]
+                    if orderId not in idTimeDic:
+                        continue
+                    actionTime = int(idTimeDic[orderId])
                     if userid in userDic:
                         transDic = userDic[userid]
                         for transId in transDic:
-                            newList = stringList.copy()
-                            newList[0] = transId
-                            fileWriter.write(
-                                    ','.join(newList)
-                                    )
+                            transTime = transDic[transId]
+                            if actionTime < transTime:
+                                newList = stringList.copy()
+                                newList[0] = transId
+                                fileWriter.write(
+                                        ','.join(newList)
+                                        )
                 else:
                     break
+
+
+def read_id_time(userHisPath):
+    '''
+    读取订单id的时间
+    '''
+    outDic = {}
+    with open(userHisPath, 'r') as fileReader:
+        count = 0
+        while True:
+            count += 1
+            if count == 1:
+                continue
+            stringLine = fileReader.readline()
+            if stringLine:
+                stringList = stringLine.split(',')
+                orderid = stringList[1]
+                time = stringList[2]
+                outDic[orderid] = time
+            else:
+                break
+    return outDic
 
 
 if __name__ == '__main__':
     # 测试样本转为训练样本
     take_test_sample()
     # 提取已经发生的样本,训练
-    userDic = __type_1_place(Config.ORDER_HISTORY_TRAIN, '987654321')
+    hisData = pd.read_table(Config.ORDER_HISTORY_TRAIN, sep=',')
+    futureData = pd.read_table(Config.LABEL_TRAIN, sep=',', index_col=0)
+    hisData = hisData.groupby('userid').sum()
+    hisData = hisData.loc[hisData.orderType == 0, :]
+    addData = futureData.loc[hisData.index, :]
+    addData = list(addData[np.array((addData == 0).values)].index)
+    userDic, labelDic = __type_1_place(
+            Config.ORDER_HISTORY_TRAIN, '987654321', addData
+            )
     __trans_action(userDic, Config.ACTION_TRAIN, Config.SAMPLE_ACTION)
-    __trans_label(userDic, Config.SAMPLE_LABEL)
+    __trans_label(labelDic, Config.SAMPLE_LABEL)
     __trans_user_profile(
             userDic, Config.USER_PROFILE_TRAIN, Config.SAMPLE_USER_PROFILE
             )
     __trans_order_his(
             userDic, Config.ORDER_HISTORY_TRAIN, Config.SAMPLE_ORDER_HISTORY
             )
+    idTimeDic = read_id_time(Config.ORDER_HISTORY_TRAIN)
     __trans_user_comment(
-            userDic, Config.USER_COMMENT_TRAIN, Config.SAMPLE_USER_COMMENT
+            userDic, Config.USER_COMMENT_TRAIN, Config.SAMPLE_USER_COMMENT,
+            idTimeDic
             )
     # 提取已经发生的样本,测试
-    userDic = __type_1_place(Config.ORDER_HISTORY_TEST, '87654321')
+    userDic, labelDic = __type_1_place(
+            Config.ORDER_HISTORY_TEST, '87654321', addData
+            )
     __trans_action(userDic, Config.ACTION_TEST, Config.SAMPLE_ACTION)
-    __trans_label(userDic, Config.SAMPLE_LABEL)
+    __trans_label(labelDic, Config.SAMPLE_LABEL)
     __trans_user_profile(
             userDic, Config.USER_PROFILE_TEST, Config.SAMPLE_USER_PROFILE
             )
     __trans_order_his(
             userDic, Config.ORDER_HISTORY_TEST, Config.SAMPLE_ORDER_HISTORY
             )
+    idTimeDic = read_id_time(Config.ORDER_HISTORY_TEST)
     __trans_user_comment(
-            userDic, Config.USER_COMMENT_TEST, Config.SAMPLE_USER_COMMENT
+            userDic, Config.USER_COMMENT_TEST, Config.SAMPLE_USER_COMMENT,
+            idTimeDic
             )
     # 将新老样本进行拼接
     combine_sample()
